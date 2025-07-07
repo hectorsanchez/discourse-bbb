@@ -91,7 +91,7 @@ export default {
           icon: "video",
           label: "bbb.composer_title",
           action: (toolbarEvent) => {
-            const modal = getOwner(this).lookup("service:modal");
+            const modal = api.container.lookup("service:modal");
             modal.show("insert-bbb", {
               model: {
                 toolbarEvent,
