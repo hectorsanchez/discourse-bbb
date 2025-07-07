@@ -2,6 +2,7 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import { iconHTML } from "discourse-common/lib/icon-library";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
+import InsertBbbModal from "../components/modal/insert-bbb";
 
 function launchBBB($elem) {
   const data = $elem.data();
@@ -90,8 +91,7 @@ export default {
           icon: "video",
           label: "bbb.composer_title",
           action: (toolbarEvent) => {
-            const modal = api.container.lookup("service:modal");
-            modal.show("insert-bbb", {
+            api.container.lookup("service:modal").show(InsertBbbModal, {
               model: {
                 toolbarEvent,
               },

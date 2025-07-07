@@ -2,8 +2,11 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { isEmpty } from "@ember/utils";
+import { inject as service } from "@ember/service";
 
 export default class InsertBbbModal extends Component {
+  @service modal;
+  
   @tracked meetingID = "";
   @tracked attendeePW = "";
   @tracked moderatorPW = "";
@@ -29,11 +32,11 @@ export default class InsertBbbModal extends Component {
         this.mobileIframe
       }" desktopIframe="${this.desktopIframe}"][/wrap]`
     );
-    this.args.closeModal();
+    this.modal.close();
   }
 
   @action
   cancel() {
-    this.args.closeModal();
+    this.modal.close();
   }
 }
