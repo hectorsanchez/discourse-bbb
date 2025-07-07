@@ -1,9 +1,9 @@
-import Controller from "@ember/controller";
-import { action } from "@ember/object";
+import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
+import { action } from "@ember/object";
 import { isEmpty } from "@ember/utils";
 
-export default class InsertBbbController extends Controller {
+export default class InsertBbbModal extends Component {
   @tracked meetingID = "";
   @tracked attendeePW = "";
   @tracked moderatorPW = "";
@@ -11,46 +11,29 @@ export default class InsertBbbController extends Controller {
   @tracked mobileIframe = false;
   @tracked desktopIframe = true;
 
-  keyDown(e) {
-    if (e.keyCode === 13) {
-      e.preventDefault();
-      e.stopPropagation();
-      return false;
-    }
-  }
-
-  onShow() {
-    this.meetingID = "";
-    this.attendeePW = "";
-    this.moderatorPW = "";
-    this.buttonText = "";
-    this.mobileIframe = false;
-    this.desktopIframe = true;
+  get insertDisabled() {
+    return isEmpty(this.meetingID);
   }
 
   randomID() {
     return Math.random().toString(36).slice(-8);
   }
 
-  get insertDisabled() {
-    return isEmpty(this.meetingID);
-  }
-
   @action
   insert() {
     const btnTxt = this.buttonText ? ` label="${this.buttonText}"` : "";
-    this.model.toolbarEvent.addText(
+    this.args.model.toolbarEvent.addText(
       `[wrap=discourse-bbb meetingID="${
         this.meetingID
       }"${btnTxt} attendeePW="${this.randomID()}" moderatorPW="${this.randomID()}" mobileIframe="${
         this.mobileIframe
       }" desktopIframe="${this.desktopIframe}"][/wrap]`
     );
-    this.model.closeModal();
+    this.args.closeModal();
   }
 
   @action
   cancel() {
-    this.model.closeModal();
+    this.args.closeModal();
   }
 }
