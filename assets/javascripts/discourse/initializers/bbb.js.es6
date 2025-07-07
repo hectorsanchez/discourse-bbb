@@ -2,7 +2,6 @@ import { withPluginApi } from "discourse/lib/plugin-api";
 import { iconHTML } from "discourse-common/lib/icon-library";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
-import InsertBbbModal from "../components/modal/insert-bbb";
 
 function launchBBB($elem) {
   const data = $elem.data();
@@ -75,29 +74,46 @@ export default {
   name: "insert-bbb",
 
   initialize() {
-    withPluginApi("1.15.0", (api) => {
+    console.log("BBB Plugin: Initializing...");
+    
+    withPluginApi("0.8.31", (api) => {
+      console.log("BBB Plugin: Plugin API loaded");
+      
       const currentUser = api.getCurrentUser();
       const siteSettings = api.container.lookup("site-settings:main");
+      
+      console.log("BBB Plugin: Current user:", currentUser);
+      console.log("BBB Plugin: BBB enabled:", siteSettings.bbb_enabled);
+      console.log("BBB Plugin: BBB staff only:", siteSettings.bbb_staff_only);
+      console.log("BBB Plugin: User is staff:", currentUser && currentUser.staff);
 
       api.decorateCooked(attachBBB, {
         id: "discourse-bbb",
       });
 
+      // Restauramos la verificación completa
       if (
         !siteSettings.bbb_staff_only ||
         (siteSettings.bbb_staff_only && currentUser && currentUser.staff)
       ) {
+        console.log("BBB Plugin: Adding composer toolbar button");
+        
         api.addComposerToolbarPopupMenuOption({
           icon: "video",
           label: "bbb.composer_title",
           action: (toolbarEvent) => {
-            api.container.lookup("service:modal").show(InsertBbbModal, {
+            console.log("BBB Plugin: Toolbar button clicked");
+            
+            const modal = api.container.lookup("service:modal");
+            modal.show("modal/insert-bbb", {
               model: {
                 toolbarEvent,
               },
             });
           },
         });
+      } else {
+        console.log("BBB Plugin: Staff only mode enabled and user is not staff");
       }
     });
   },
