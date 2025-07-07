@@ -1,42 +1,43 @@
-<DModalBody @title="bbb.modal.title" @class="insert-bbb">
-  <div class="insert-bbb-form">
-    <div class="insert-bbb-input">
-      <label>{{i18n "bbb.meetingID"}}</label>
-      <TextField @value={{meetingID}} />
+<DModal @closeModal={{@model.closeModal}} @title={{i18n "bbb.modal.title"}}>
+  <:body>
+    <div class="insert-bbb-form">
+      <div class="insert-bbb-input">
+        <label>{{i18n "bbb.meetingID"}}</label>
+        <TextField @value={{this.meetingID}} />
+      </div>
+
+      <div class="insert-bbb-input bbb-button-text">
+        <label>{{i18n "bbb.button_text"}}</label>
+        <TextField @value={{this.buttonText}} @placeholderKey="bbb.launch" />
+      </div>
+
+      <div class="insert-bbb-input">
+        <label class="checkbox-label">
+          <Input @type="checkbox" @checked={{this.mobileIframe}} />
+          {{i18n "bbb.modal.mobile_iframe"}}
+        </label>
+      </div>
+
+      <div class="insert-bbb-input">
+        <label class="checkbox-label">
+          <Input @type="checkbox" @checked={{this.desktopIframe}} />
+          {{i18n "bbb.modal.desktop_iframe"}}
+        </label>
+      </div>
+
     </div>
-
-    <div class="insert-bbb-input bbb-button-text">
-      <label>{{i18n "bbb.button_text"}}</label>
-      <TextField @value={{buttonText}} @placeholderKey="bbb.launch" />
-    </div>
-
-    <div class="insert-bbb-input">
-      <label class="checkbox-label">
-        {{input type="checkbox" checked=mobileIframe}}
-        {{i18n "bbb.modal.mobile_iframe"}}
-      </label>
-    </div>
-
-    <div class="insert-bbb-input">
-      <label class="checkbox-label">
-        {{input type="checkbox" checked=desktopIframe}}
-        {{i18n "bbb.modal.desktop_iframe"}}
-      </label>
-    </div>
-
-  </div>
-</DModalBody>
-
-<div class="modal-footer">
-  <DButton
-    @class="btn-primary"
-    @disabled={{insertDisabled}}
-    @label="bbb.modal.insert"
-    @action={{action "insert"}}
-  />
-  <DButton
-    @class="btn-danger"
-    @label="bbb.modal.cancel"
-    @action={{action "cancel"}}
-  />
-</div>
+  </:body>
+  <:footer>
+    <DButton
+      @class="btn-primary"
+      @disabled={{this.insertDisabled}}
+      @label="bbb.modal.insert"
+      @action={{this.insert}}
+    />
+    <DButton
+      @class="btn-danger"
+      @label="bbb.modal.cancel"
+      @action={{this.cancel}}
+    />
+  </:footer>
+</DModal>

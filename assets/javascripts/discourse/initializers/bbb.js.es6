@@ -1,5 +1,5 @@
 import { withPluginApi } from "discourse/lib/plugin-api";
-import showModal from "discourse/lib/show-modal";
+import { getOwner } from "@ember/application";
 import { iconHTML } from "discourse-common/lib/icon-library";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
@@ -91,8 +91,12 @@ export default {
           icon: "video",
           label: "bbb.composer_title",
           action: (toolbarEvent) => {
-            showModal("insert-bbb").setProperties({
-              toolbarEvent,
+            const modal = getOwner(this).lookup("service:modal");
+            modal.show("insert-bbb", {
+              model: {
+                toolbarEvent,
+                closeModal: () => modal.close(),
+              },
             });
           },
         });
