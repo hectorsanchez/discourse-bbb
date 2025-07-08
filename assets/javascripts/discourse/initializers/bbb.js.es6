@@ -91,7 +91,6 @@ export default {
         id: "discourse-bbb",
       });
 
-      // Restauramos la verificación completa
       if (
         !siteSettings.bbb_staff_only ||
         (siteSettings.bbb_staff_only && currentUser && currentUser.staff)
@@ -104,12 +103,32 @@ export default {
           action: (toolbarEvent) => {
             console.log("BBB Plugin: Toolbar button clicked");
             
-            const modal = api.container.lookup("service:modal");
-            modal.show("modal/insert-bbb", {
-              model: {
-                toolbarEvent,
-              },
-            });
+            try {
+              const modal = api.container.lookup("service:modal");
+              console.log("BBB Plugin: Modal service found:", modal);
+              
+              modal.show("modal/insert-bbb", {
+                model: {
+                  toolbarEvent,
+                },
+              });
+              console.log("BBB Plugin: Modal.show called");
+            } catch (error) {
+              console.error("BBB Plugin: Error showing modal:", error);
+              
+              // Fallback: intentar con el método anterior
+              try {
+                console.log("BBB Plugin: Trying fallback modal method");
+                const modalService = api.container.lookup("service:modal");
+                modalService.show("insert-bbb", {
+                  model: {
+                    toolbarEvent,
+                  },
+                });
+              } catch (fallbackError) {
+                console.error("BBB Plugin: Fallback also failed:", fallbackError);
+              }
+            }
           },
         });
       } else {
