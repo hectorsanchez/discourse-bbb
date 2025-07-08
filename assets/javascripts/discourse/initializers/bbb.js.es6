@@ -97,40 +97,47 @@ export default {
       ) {
         console.log("BBB Plugin: Adding composer toolbar button");
         
-        api.addComposerToolbarPopupMenuOption({
-          icon: "video",
-          label: "bbb.composer_title",
-          action: (toolbarEvent) => {
-            console.log("BBB Plugin: Toolbar button clicked");
+        const toolbarAction = (toolbarEvent) => {
+          console.log("BBB Plugin: *** TOOLBAR BUTTON CLICKED ***");
+          console.log("BBB Plugin: toolbarEvent:", toolbarEvent);
+          
+          try {
+            const modal = api.container.lookup("service:modal");
+            console.log("BBB Plugin: Modal service found:", modal);
             
+            modal.show("modal/insert-bbb", {
+              model: {
+                toolbarEvent,
+              },
+            });
+            console.log("BBB Plugin: Modal.show called");
+          } catch (error) {
+            console.error("BBB Plugin: Error showing modal:", error);
+            
+            // Fallback: intentar con el método anterior
             try {
-              const modal = api.container.lookup("service:modal");
-              console.log("BBB Plugin: Modal service found:", modal);
-              
-              modal.show("modal/insert-bbb", {
+              console.log("BBB Plugin: Trying fallback modal method");
+              const modalService = api.container.lookup("service:modal");
+              modalService.show("insert-bbb", {
                 model: {
                   toolbarEvent,
                 },
               });
-              console.log("BBB Plugin: Modal.show called");
-            } catch (error) {
-              console.error("BBB Plugin: Error showing modal:", error);
-              
-              // Fallback: intentar con el método anterior
-              try {
-                console.log("BBB Plugin: Trying fallback modal method");
-                const modalService = api.container.lookup("service:modal");
-                modalService.show("insert-bbb", {
-                  model: {
-                    toolbarEvent,
-                  },
-                });
-              } catch (fallbackError) {
-                console.error("BBB Plugin: Fallback also failed:", fallbackError);
-              }
+            } catch (fallbackError) {
+              console.error("BBB Plugin: Fallback also failed:", fallbackError);
             }
-          },
+          }
+        };
+        
+        console.log("BBB Plugin: Toolbar action function created:", toolbarAction);
+        
+        api.addComposerToolbarPopupMenuOption({
+          icon: "video",
+          label: "bbb.composer_title",
+          action: toolbarAction,
         });
+        
+        console.log("BBB Plugin: addComposerToolbarPopupMenuOption called");
       } else {
         console.log("BBB Plugin: Staff only mode enabled and user is not staff");
       }
