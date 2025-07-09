@@ -9,7 +9,6 @@
 enabled_site_setting :bbb_enabled
 
 register_asset "stylesheets/common/bbb.scss"
-register_asset "javascripts/initializers/discourse-bbb-test.js"
 register_svg_icon "video"
 
 after_initialize do
