@@ -1,13 +1,13 @@
 en:
   js:
     bbb:
-      composer_title: Add BigBlueButton
-      meetingID: Meeting ID
-      button_text: Button label (optional)
-      launch: Start Video Conference
+      composer_title: "Insert BigBlueButton Meeting"
+      launch: "Join Meeting"
+      meetingID: "Meeting ID"
+      button_text: "Button Text"
       modal:
-        insert: Insert
-        cancel: Cancel
-        title: Add BBB Integration
-        mobile_iframe: Show in an iframe on mobile devices
-        desktop_iframe: Show in an iframe on desktop devices
+        title: "Insert BigBlueButton Meeting"
+        insert: "Insert"
+        cancel: "Cancel"
+        mobile_iframe: "Show as iframe on mobile"
+        desktop_iframe: "Show as iframe on desktop"
