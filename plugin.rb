@@ -7,8 +7,9 @@
 # url: https://github.com/pmusaraj/discourse-bbb
 
 enabled_site_setting :bbb_enabled
-register_asset "stylesheets/common/bbb.scss"
 
+register_asset "stylesheets/common/bbb.scss"
+register_asset "javascripts/initializers/discourse-bbb-test.js"
 register_svg_icon "video"
 
 after_initialize do
@@ -33,5 +34,4 @@ after_initialize do
   Discourse::Application.routes.append do
     mount ::BigBlue::Engine, at: "/bbb"
   end
-
 end
