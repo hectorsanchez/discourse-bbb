@@ -1,3 +1,4 @@
+import InsertBbbModal from "../components/modal/insert-bbb";
 import { withPluginApi } from "discourse/lib/plugin-api";
 import { iconHTML } from "discourse-common/lib/icon-library";
 import { ajax } from "discourse/lib/ajax";
@@ -80,7 +81,7 @@ export default {
           icon: "video",
           label: "bbb.composer_title",
           action: (toolbarEvent) => {
-            api.container.lookup("service:modal").show("insert-bbb", {
+            api.container.lookup("service:modal").show(InsertBbbModal, {
               model: { toolbarEvent }
             });
           },
