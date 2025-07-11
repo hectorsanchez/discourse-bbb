@@ -14,18 +14,8 @@ function launchBBB($elem) {
   })
     .then((res) => {
       if (res.url) {
-        if (
-          capabilities.isAppWebview ||
-          (site.mobileView && !data.mobileIframe) ||
-          (!site.mobileView && !data.desktopIframe)
-        ) {
-          window.location.href = res.url;
-        } else {
-          $elem.children().hide();
-          $elem.append(
-            `<iframe src="${res.url}" allowfullscreen="true" allow="camera; microphone; fullscreen; speaker" width="100%" height="500" style="border:none"></iframe>`
-          );
-        }
+        // Always open in new window due to X-Frame-Options
+        window.open(res.url, "_blank");
       }
     })
     .catch(function (error) {

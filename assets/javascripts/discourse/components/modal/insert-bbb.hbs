@@ -1,0 +1,44 @@
+<DModal
+  @title="Insert BigBlueButton Meeting"
+  @closeModal={{@closeModal}}
+  class="insert-bbb-modal"
+>
+  <:body>
+    <div class="control-group">
+      <label>Meeting ID</label>
+      <Input @value={{this.meetingID}} placeholder="Enter meeting ID" />
+    </div>
+    
+    <div class="control-group">
+      <label>Button Text (optional)</label>
+      <Input @value={{this.buttonText}} placeholder="Custom button text" />
+    </div>
+    
+    <div class="control-group">
+      <label>
+        <Input @type="checkbox" @checked={{this.mobileIframe}} />
+        Show as iframe on mobile
+      </label>
+    </div>
+    
+    <div class="control-group">
+      <label>
+        <Input @type="checkbox" @checked={{this.desktopIframe}} />
+        Show as iframe on desktop
+      </label>
+    </div>
+  </:body>
+  
+  <:footer>
+    <DButton
+      @class="btn-primary"
+      @action={{this.insert}}
+      @disabled={{this.insertDisabled}}
+    >
+      Insert
+    </DButton>
+    <DButton @class="btn-flat" @action={{@closeModal}}>
+      Cancel
+    </DButton>
+  </:footer>
+</DModal>

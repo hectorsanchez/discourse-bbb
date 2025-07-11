@@ -29,6 +29,6 @@ export default class InsertBbbModal extends Component {
         this.mobileIframe
       }" desktopIframe="${this.desktopIframe}"][/wrap]`
     );
-    this.args.closeModal();
+    this.args.closeModal?.();
   }
 }
