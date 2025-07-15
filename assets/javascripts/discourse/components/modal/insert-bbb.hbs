@@ -4,11 +4,50 @@
   class="insert-bbb-modal"
 >
   <:body>
+    <!-- Radio buttons para elegir tipo de meeting -->
     <div class="control-group">
-      <label>Meeting ID</label>
-      <Input @value={{this.meetingID}} placeholder="Enter meeting ID" />
+      <label>Meeting Type</label>
+      <div class="radio-group">
+        <label class="radio-label">
+          <input 
+            type="radio" 
+            name="meetingType" 
+            value="existing" 
+            checked={{eq this.meetingType "existing"}}
+            {{on "change" (fn this.setMeetingType "existing")}}
+          />
+          Use Existing Meeting ID
+        </label>
+        <label class="radio-label">
+          <input 
+            type="radio" 
+            name="meetingType" 
+            value="new" 
+            checked={{eq this.meetingType "new"}}
+            {{on "change" (fn this.setMeetingType "new")}}
+          />
+          Create New Meeting
+        </label>
+      </div>
     </div>
-    
+
+    <!-- Campo condicional para Meeting ID existente -->
+    {{#if (eq this.meetingType "existing")}}
+      <div class="control-group">
+        <label>Meeting ID</label>
+        <Input @value={{this.meetingID}} placeholder="Enter existing meeting ID" />
+      </div>
+    {{/if}}
+
+    <!-- Campo condicional para nuevo meeting -->
+    {{#if (eq this.meetingType "new")}}
+      <div class="control-group">
+        <label>Meeting Name</label>
+        <Input @value={{this.meetingName}} placeholder="Enter meeting name" />
+      </div>
+    {{/if}}
+
+    <!-- Campos comunes -->
     <div class="control-group">
       <label>Button Text (optional)</label>
       <Input @value={{this.buttonText}} placeholder="Custom button text" />
