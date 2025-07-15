@@ -72,12 +72,14 @@
       @class="btn-primary"
       @action={{this.insert}}
       @disabled={{this.insertDisabled}}
-      @label="bbb.modal.insert"
     >
-      Insert
+      {{i18n "bbb.modal.insert"}}
     </DButton>
-    <DButton @class="btn-flat" @action={{@closeModal}} @label="bbb.modal.cancel">
-      Cancel
+    <DButton 
+      @class="btn-flat" 
+      @action={{@closeModal}}
+    >
+      {{i18n "bbb.modal.cancel"}}
     </DButton>
   </:footer>
 </DModal>
