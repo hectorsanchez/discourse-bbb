@@ -1,12 +1,11 @@
-<DModal
-  @title="Insert BigBlueButton Meeting"
-  @closeModal={{@closeModal}}
-  class="insert-bbb-modal"
->
+<DModal  
+  @title={{i18n "bbb.modal.title"}}
+  @closeModal={{@closeModal}}  
+  class="insert-bbb-modal">
   <:body>
     <!-- Radio buttons para elegir tipo de meeting -->
     <div class="control-group">
-      <label>Meeting Type</label>
+      <label>{{i18n "bbb.meeting_type"}}</label>
       <div class="radio-group">
         <label class="radio-label">
           <input 
@@ -16,7 +15,7 @@
             checked={{eq this.meetingType "existing"}}
             {{on "change" (fn this.setMeetingType "existing")}}
           />
-          Use Existing Meeting ID
+          {{i18n "bbb.existing_meeting"}}
         </label>
         <label class="radio-label">
           <input 
@@ -26,7 +25,7 @@
             checked={{eq this.meetingType "new"}}
             {{on "change" (fn this.setMeetingType "new")}}
           />
-          Create New Meeting
+          {{i18n "bbb.new_meeting"}}
         </label>
       </div>
     </div>
@@ -34,36 +33,36 @@
     <!-- Campo condicional para Meeting ID existente -->
     {{#if (eq this.meetingType "existing")}}
       <div class="control-group">
-        <label>Meeting ID</label>
-        <Input @value={{this.meetingID}} placeholder="Enter existing meeting ID" />
+        <label>{{i18n "bbb.meetingID"}}</label>
+        <Input @value={{this.meetingID}} @placeholderKey="bbb.meetingID_placeholder" />
       </div>
     {{/if}}
 
     <!-- Campo condicional para nuevo meeting -->
     {{#if (eq this.meetingType "new")}}
       <div class="control-group">
-        <label>Meeting Name</label>
-        <Input @value={{this.meetingName}} placeholder="Enter meeting name" />
+        <label>{{i18n "bbb.meetingName"}}</label>
+        <Input @value={{this.meetingName}} @placeholderKey="bbb.meetingName_placeholder" />
       </div>
     {{/if}}
 
     <!-- Campos comunes -->
     <div class="control-group">
-      <label>Button Text (optional)</label>
-      <Input @value={{this.buttonText}} placeholder="Custom button text" />
+      <label>{{i18n "bbb.button_text"}}</label>
+      <Input @value={{this.buttonText}} @placeholderKey="bbb.launch" />
     </div>
     
     <div class="control-group">
       <label>
         <Input @type="checkbox" @checked={{this.mobileIframe}} />
-        Show as iframe on mobile
+        {{i18n "bbb.modal.mobile_iframe"}}
       </label>
     </div>
     
     <div class="control-group">
       <label>
         <Input @type="checkbox" @checked={{this.desktopIframe}} />
-        Show as iframe on desktop
+        {{i18n "bbb.modal.desktop_iframe"}}
       </label>
     </div>
   </:body>
@@ -73,10 +72,11 @@
       @class="btn-primary"
       @action={{this.insert}}
       @disabled={{this.insertDisabled}}
+      @label="bbb.modal.insert"
     >
       Insert
     </DButton>
-    <DButton @class="btn-flat" @action={{@closeModal}}>
+    <DButton @class="btn-flat" @action={{@closeModal}} @label="bbb.modal.cancel">
       Cancel
     </DButton>
   </:footer>
