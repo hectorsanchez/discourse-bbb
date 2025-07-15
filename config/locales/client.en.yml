@@ -4,7 +4,13 @@ en:
       composer_title: "Insert BigBlueButton Meeting"
       launch: "Join Meeting"
       meetingID: "Meeting ID"
+      meetingName: "Meeting Name"
       button_text: "Button Text"
+      meeting_type: "Meeting Type"
+      existing_meeting: "Use Existing Meeting ID"
+      new_meeting: "Create New Meeting"
+      meetingID_placeholder: "Enter existing meeting ID"
+      meetingName_placeholder: "Enter meeting name"
       modal:
         title: "Insert BigBlueButton Meeting"
         insert: "Insert"

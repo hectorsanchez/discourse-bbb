@@ -5,20 +5,62 @@
 >
   <:body>
     <div class="insert-bbb-form">
+      <!-- Radio buttons para elegir tipo de meeting -->
       <div class="insert-bbb-input">
-        <label>{{i18n "bbb.meetingID"}}</label>
-        <TextField @value={{this.meetingID}} />
+        <label>{{i18n "bbb.meeting_type"}}</label>
+        <div class="radio-group">
+          <label class="radio-label">
+            <input 
+              type="radio" 
+              name="meetingType" 
+              value="existing" 
+              checked={{eq this.meetingType "existing"}}
+              {{on "change" (fn this.setMeetingType "existing")}}
+            />
+            {{i18n "bbb.existing_meeting"}}
+          </label>
+          <label class="radio-label">
+            <input 
+              type="radio" 
+              name="meetingType" 
+              value="new" 
+              checked={{eq this.meetingType "new"}}
+              {{on "change" (fn this.setMeetingType "new")}}
+            />
+            {{i18n "bbb.new_meeting"}}
+          </label>
+        </div>
       </div>
+
+      <!-- Campo condicional para Meeting ID existente -->
+      {{#if (eq this.meetingType "existing")}}
+        <div class="insert-bbb-input">
+          <label>{{i18n "bbb.meetingID"}}</label>
+          <TextField @value={{this.meetingID}} @placeholderKey="bbb.meetingID_placeholder" />
+        </div>
+      {{/if}}
+
+      <!-- Campo condicional para nuevo meeting -->
+      {{#if (eq this.meetingType "new")}}
+        <div class="insert-bbb-input">
+          <label>{{i18n "bbb.meetingName"}}</label>
+          <TextField @value={{this.meetingName}} @placeholderKey="bbb.meetingName_placeholder" />
+        </div>
+      {{/if}}
+
+      <!-- Campos comunes -->
       <div class="insert-bbb-input bbb-button-text">
         <label>{{i18n "bbb.button_text"}}</label>
         <TextField @value={{this.buttonText}} @placeholderKey="bbb.launch" />
       </div>
+      
       <div class="insert-bbb-input">
         <label class="checkbox-label">
           <Input @type="checkbox" @checked={{this.mobileIframe}} />
           {{i18n "bbb.modal.mobile_iframe"}}
         </label>
       </div>
+      
       <div class="insert-bbb-input">
         <label class="checkbox-label">
           <Input @type="checkbox" @checked={{this.desktopIframe}} />
