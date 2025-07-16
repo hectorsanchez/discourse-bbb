@@ -3,10 +3,10 @@
   @closeModal={{@closeModal}}  
   class="insert-bbb-modal">
   <:body>
-    <!-- Campo para Meeting Name -->
+    <!-- Campo para Meeting Name con límite de 30 caracteres -->
     <div class="control-group">
       <label>{{i18n "bbb.meetingName"}}</label>
-      <Input @value={{this.meetingName}} @placeholderKey="bbb.meetingName_placeholder" />
+      <Input @value={{this.meetingName}} @placeholderKey="bbb.meetingName_placeholder" @maxlength="30" />
     </div>
 
     <!-- Texto de ayuda -->

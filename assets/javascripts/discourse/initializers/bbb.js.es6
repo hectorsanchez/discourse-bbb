@@ -25,8 +25,19 @@ function launchBBB($elem) {
 }
 
 function attachButton($elem) {
-  const buttonLabel = $elem.data("label") || I18n.t("bbb.launch");
-
+  const data = $elem.data();
+  const meetingName = data.meetingname || data.meetingName; // Puede venir como meetingname o meetingName
+  const customLabel = data.label;
+  
+  let buttonLabel;
+  if (customLabel) {
+    buttonLabel = customLabel;
+  } else if (meetingName) {
+    buttonLabel = `Join Meeting: ${meetingName}`;
+  } else {
+    buttonLabel = I18n.t("bbb.launch");
+  }
+  
   $elem.html(
     `<button class='launch-bbb btn'>${iconHTML(
       "video"
