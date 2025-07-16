@@ -10,9 +10,15 @@ export default class InsertBbbModal extends Component {
     return isEmpty(this.meetingName);
   }
 
+  @action
   updateMeetingName(value) {
     console.log("Input value:", value);
-    this.meetingName = value.substring(0, 30);
+    // Forzar límite de 30 caracteres
+    if (value.length > 30) {
+      this.meetingName = value.substring(0, 30);
+    } else {
+      this.meetingName = value;
+    }
     console.log("Final meetingName:", this.meetingName);
   }
 
