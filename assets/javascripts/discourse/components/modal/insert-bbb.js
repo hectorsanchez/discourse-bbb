@@ -11,11 +11,15 @@ export default class InsertBbbModal extends Component {
   }
 
   @action
-  updateMeetingName(value) {
-    console.log("Input value:", value);
+  handleInput(event) {
+    console.log("Event triggered!");
+    console.log("Input value:", event.target.value);
+    
     // Forzar límite de 30 caracteres
+    const value = event.target.value;
     if (value.length > 30) {
       this.meetingName = value.substring(0, 30);
+      event.target.value = this.meetingName; // Forzar el valor en el DOM
     } else {
       this.meetingName = value;
     }
@@ -24,7 +28,7 @@ export default class InsertBbbModal extends Component {
 
   @action
   insert() {
-    // Solo crear nuevo meeting con el nombre
+    console.log("Insert called with:", this.meetingName);
     this.args.model.toolbarEvent.addText(
       `[wrap=discourse-bbb mode="new" meetingName="${this.meetingName}"][/wrap]`
     );
