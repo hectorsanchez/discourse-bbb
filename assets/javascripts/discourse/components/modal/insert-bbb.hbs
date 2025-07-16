@@ -3,66 +3,16 @@
   @closeModal={{@closeModal}}  
   class="insert-bbb-modal">
   <:body>
-    <!-- Radio buttons para elegir tipo de meeting -->
+    <!-- Campo para Meeting Name -->
     <div class="control-group">
-      <label>{{i18n "bbb.meeting_type"}}</label>
-      <div class="radio-group">
-        <label class="radio-label">
-          <input 
-            type="radio" 
-            name="meetingType" 
-            value="existing" 
-            checked={{eq this.meetingType "existing"}}
-            {{on "change" (fn this.setMeetingType "existing")}}
-          />
-          {{i18n "bbb.existing_meeting"}}
-        </label>
-        <label class="radio-label">
-          <input 
-            type="radio" 
-            name="meetingType" 
-            value="new" 
-            checked={{eq this.meetingType "new"}}
-            {{on "change" (fn this.setMeetingType "new")}}
-          />
-          {{i18n "bbb.new_meeting"}}
-        </label>
-      </div>
+      <label>{{i18n "bbb.meetingName"}}</label>
+      <Input @value={{this.meetingName}} @placeholderKey="bbb.meetingName_placeholder" />
     </div>
 
-    <!-- Campo condicional para Meeting ID existente -->
-    {{#if (eq this.meetingType "existing")}}
-      <div class="control-group">
-        <label>{{i18n "bbb.meetingID"}}</label>
-        <Input @value={{this.meetingID}} @placeholderKey="bbb.meetingID_placeholder" />
-      </div>
-    {{/if}}
-
-    <!-- Campo condicional para nuevo meeting -->
-    {{#if (eq this.meetingType "new")}}
-      <div class="control-group">
-        <label>{{i18n "bbb.meetingName"}}</label>
-        <Input @value={{this.meetingName}} @placeholderKey="bbb.meetingName_placeholder" />
-      </div>
-    {{/if}}
-
-    <!-- Campos comunes -->
-    <div class="control-group">
-      <label>{{i18n "bbb.button_text"}}</label>
-      <Input @value={{this.buttonText}} @placeholderKey="bbb.launch" />
-    </div>
-    
+    <!-- Texto de ayuda -->
     <div class="control-group">
       <label>
-        <Input @type="checkbox" @checked={{this.mobileIframe}} />
-        {{i18n "bbb.modal.mobile_iframe"}}
-      </label>
-    </div>
-    
-    <div class="control-group">
-      <label>
-        <Input @type="checkbox" @checked={{this.desktopIframe}} />
-        {{i18n "bbb.modal.desktop_iframe"}}
+        Once created, your meeting room will be accessible through a button inserted in your post.
       </label>
     </div>
   </:body>

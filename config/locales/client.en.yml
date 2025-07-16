@@ -1,19 +1,14 @@
 en:
   js:
     bbb:
-      composer_title: "Insert BigBlueButton Meeting"
+      composer_title: "Create a meeting room"
       launch: "Join Meeting"
-      meetingID: "Meeting ID"
       meetingName: "Meeting Name"
-      button_text: "Button Text"
-      meeting_type: "Meeting Type"
-      existing_meeting: "Use Existing Meeting ID"
-      new_meeting: "Create New Meeting"
-      meetingID_placeholder: "Enter existing meeting ID"
       meetingName_placeholder: "Enter meeting name"
+      button_text: "Button Text"
       modal:
-        title: "Insert BigBlueButton Meeting"
-        insert: "Insert"
+        title: "Create a meeting room"
+        insert: "Create the room"
         cancel: "Cancel"
         mobile_iframe: "Show as iframe on mobile"
         desktop_iframe: "Show as iframe on desktop"
