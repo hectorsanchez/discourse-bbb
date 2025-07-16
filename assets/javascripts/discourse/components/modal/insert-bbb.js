@@ -10,6 +10,12 @@ export default class InsertBbbModal extends Component {
     return isEmpty(this.meetingName);
   }
 
+  updateMeetingName(value) {
+    console.log("Input value:", value);
+    this.meetingName = value.substring(0, 30);
+    console.log("Final meetingName:", this.meetingName);
+  }
+
   @action
   insert() {
     // Solo crear nuevo meeting con el nombre

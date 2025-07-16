@@ -6,7 +6,7 @@
     <!-- Campo para Meeting Name con límite de 30 caracteres -->
     <div class="control-group">
       <label>{{i18n "bbb.meetingName"}}</label>
-      <Input @value={{this.meetingName}} @placeholderKey="bbb.meetingName_placeholder" @maxlength="30" />
+      <Input @value={{this.meetingName}} @input={{this.updateMeetingName}} @placeholderKey="bbb.meetingName_placeholder" @maxLength="30" />
     </div>
 
     <!-- Texto de ayuda -->
