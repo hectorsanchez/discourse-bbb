@@ -9,16 +9,42 @@ module BigBlue
 
     def create
       if params['mode'] == 'new'
+        # Validar y procesar los nuevos parámetros de fecha y duración
+        start_date = params['startDate']
+        start_time = params['startTime']
+        duration = params['duration']
+
+        if start_date.blank? || start_time.blank? || duration.blank?
+          return render json: { error: 'Missing start date, time or duration' }, status: 422
+        end
+
+        # Parsear fecha y hora en GMT
+        begin
+          start_datetime = Time.strptime("#{start_date} #{start_time}", "%Y-%m-%d %H:%M").utc
+        rescue ArgumentError
+          return render json: { error: 'Invalid date or time format' }, status: 422
+        end
+        duration_minutes = duration.to_i
+        if duration_minutes <= 0
+          return render json: { error: 'Invalid duration' }, status: 422
+        end
+        end_datetime = start_datetime + duration_minutes.minutes
+        now = Time.now.utc
+
+        if now < start_datetime
+          return render json: { error: 'Meeting has not started yet' }, status: 403
+        elsif now > end_datetime
+          return render json: { error: 'Meeting has already ended' }, status: 403
+        end
+
         # Nueva funcionalidad: crear meeting automáticamente
-        meeting_data = create_new_meeting(params)
+        meeting_data = create_new_meeting(params, duration_minutes)
         return render json: { error: 'Could not create meeting' } unless meeting_data
-        
         url = create_and_join(meeting_data)
       else
         # Funcionalidad existente: usar meeting ID proporcionado
         url = create_and_join(params)
       end
-      
       render json: { url: url }
     end
 
@@ -60,15 +86,11 @@ module BigBlue
       build_url("join", join_params)
     end
 
-    def create_new_meeting(args)
+    def create_new_meeting(args, duration_minutes = nil)
       return false unless SiteSetting.bbb_endpoint && SiteSetting.bbb_secret
-
-      # Generar IDs y passwords únicos y seguros
       meeting_id = "discourse-#{SecureRandom.hex(8)}-#{Time.now.to_i}"
       attendee_pw = SecureRandom.hex(8)
       moderator_pw = SecureRandom.hex(8)
-
-      # Parámetros para crear el meeting
       create_params = {
         name: args['meetingName'] || "Discourse Meeting",
         meetingID: meeting_id,
@@ -77,28 +99,17 @@ module BigBlue
         logoutURL: Discourse.base_url,
         welcome: "Welcome to the Discourse meeting!"
       }
-
-      # Construir query con encoding correcto
+      # Agregar duración si está presente
+      create_params[:duration] = duration_minutes if duration_minutes
       query = create_params.map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join('&')
-      
-      # Generar checksum
       secret = SiteSetting.bbb_secret
       checksum = Digest::SHA1.hexdigest("create" + query + secret)
-      
-      # URL completa para crear meeting
       create_url = "#{SiteSetting.bbb_endpoint}create?#{query}&checksum=#{checksum}"
-      
-      # Hacer la llamada para crear el meeting
       response = Excon.get(create_url)
-      
       if response.status == 200
-        # Parsear respuesta XML
         data = Hash.from_xml(response.body)
-        
         if data['response']['returncode'] == "SUCCESS"
           Rails.logger.info("New BBB meeting created: #{meeting_id}")
-          
-          # Retornar datos del meeting creado para usar en create_and_join
           {
             'meetingID' => meeting_id,
             'attendeePW' => attendee_pw,

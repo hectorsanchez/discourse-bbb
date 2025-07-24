@@ -3,6 +3,9 @@
   @closeModal={{@closeModal}}  
   class="insert-bbb-modal">
   <:body>
+    {{#if this.errorMsg}}
+      <div class="alert alert-error">{{this.errorMsg}}</div>
+    {{/if}}
     <!-- Campo para Meeting Name con límite de 30 caracteres -->
     <div class="control-group">
       <label>{{i18n "bbb.meetingName"}}</label>
@@ -13,6 +16,39 @@
         {{on "input" this.handleInput}}
         {{on "keyup" this.handleInput}}
         {{on "paste" this.handleInput}}
+      />
+    </div>
+
+    <!-- Campo para Fecha de inicio -->
+    <div class="control-group">
+      <label>{{i18n "bbb.startDate"}}</label>
+      <input 
+        type="date" 
+        value={{this.startDate}} 
+        {{on "input" this.handleStartDateInput}}
+      />
+    </div>
+
+    <!-- Campo para Horario de inicio (GMT) -->
+    <div class="control-group">
+      <label>{{i18n "bbb.startTime"}}</label>
+      <input 
+        type="time" 
+        value={{this.startTime}} 
+        {{on "input" this.handleStartTimeInput}}
+      />
+      <span class="help">GMT</span>
+    </div>
+
+    <!-- Campo para Duración (en minutos) -->
+    <div class="control-group">
+      <label>{{i18n "bbb.duration"}}</label>
+      <input 
+        type="number" 
+        min="1"
+        value={{this.duration}} 
+        placeholder="60"
+        {{on "input" this.handleDurationInput}}
       />
     </div>
 
