@@ -34,24 +34,32 @@ after_initialize do
     mount ::BigBlue::Engine, at: "/bbb"
   end
 
-  # Registrar el token 'wrap' para el parser de Markdown
-  register_html_builder('post') do |context|
-    if context.post.raw.include?('[wrap')
-      context.raw.gsub!(/\[wrap([^\]]*)\](.*?)\[\/wrap\]/m) do |match|
-        attrs = $1.strip
+  # Registrar el procesador de [wrap] BBCode
+  register_custom_html('post') do |doc, post|
+    # Buscar elementos que contengan [wrap...] BBCode
+    doc.css('p').each do |p|
+      next unless p.content =~ /\[wrap.*?\].*?\[\/wrap\]/m
+      
+      html_content = p.inner_html.gsub(/\[wrap([^\]]*)\](.*?)\[\/wrap\]/m) do |match|
+        attrs_string = $1.strip
         content = $2.strip
         
-        # Parsear atributos
+        # Parsear atributos del BBCode
         data_attrs = {}
-        attrs.scan(/(\w+)="([^"]*)"/).each do |key, value|
-          data_attrs["data-#{key}"] = value
+        attrs_string.scan(/(\w+)="([^"]*)"/).each do |key, value|
+          data_attrs["data-#{key}"] = CGI.escapeHTML(value)
         end
         
-        # Construir el HTML
+        # Construir string de data attributes
         data_attr_string = data_attrs.map { |k, v| "#{k}=\"#{v}\"" }.join(' ')
+        
+        # Retornar HTML convertido
         "<div class=\"wrap-container\" #{data_attr_string}>#{content}</div>"
       end
+      
+      p.inner_html = html_content
     end
-    context.raw
+    
+    doc
   end
 end
