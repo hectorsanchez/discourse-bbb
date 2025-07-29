@@ -76,11 +76,11 @@ export default class InsertBbbModal extends Component {
         window.open(res.url, "_blank");
         this.args.closeModal?.();
       } else if (res.success) {
-        // Si se creó exitosamente pero está fuera del rango, insertar el botón
-        // Generar HTML directo en lugar de BBCode para evitar problemas con el parser
-        const htmlContent = `<div class="wrap-container" data-wrap="discourse-bbb" data-meetingname="${this.meetingName}" data-startdate="${this.startDate}" data-starttime="${this.startTime}" data-duration="${this.duration || '60'}">Join Meeting: ${this.meetingName}</div>`;
-        
-        this.args.model.toolbarEvent.addText(htmlContent);
+        // Si se creó exitosamente pero está fuera del rango, insertar BBCode
+        // Ahora debería funcionar con el procesador de markdown registrado
+        this.args.model.toolbarEvent.addText(
+          `[wrap=discourse-bbb,${this.meetingName},${this.startDate},${this.startTime},${this.duration || '60'}]Join Meeting: ${this.meetingName}[/wrap]`
+        );
         this.args.closeModal?.();
       } else if (res.error) {
         this.errorMsg = this._errorMessage(res.error, res);

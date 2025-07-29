@@ -34,5 +34,47 @@ after_initialize do
     mount ::BigBlue::Engine, at: "/bbb"
   end
 
-  # Simplemente asegurar que nuestros divs se procesen correctamente
+  # Registrar el BBCode [wrap] usando la API moderna de Discourse 3.5.0
+  # Usamos el mecanismo de markdown allowlist personalizado
+  
+  # Primero, agregamos el elemento a la allowlist
+  allowlist_elements = %w[div]
+  allowlist_attributes = {
+    "div" => %w[class data-wrap data-meetingname data-startdate data-starttime data-duration data-mode]
+  }
+  
+  # Registrar el procesador de markdown personalizado
+  DiscoursePluginRegistry.register_markdown_processor(
+    "bbb_wrap",
+    priority: 100
+  ) do |text|
+    text.gsub(/\[wrap=([^\]]*)\](.*?)\[\/wrap\]/m) do |match|
+      args = $1
+      content = $2.strip
+      
+      # Parsear argumentos
+      data_attrs = ''
+      if args
+        parts = args.split(',')
+        if parts.length >= 1 && parts[0] == 'discourse-bbb'
+          data_attrs = 'data-wrap="discourse-bbb"'
+          
+          if parts[1] && !parts[1].empty?
+            data_attrs += " data-meetingname=\"#{CGI.escapeHTML(parts[1])}\""
+          end
+          if parts[2] && !parts[2].empty?
+            data_attrs += " data-startdate=\"#{CGI.escapeHTML(parts[2])}\""
+          end
+          if parts[3] && !parts[3].empty?
+            data_attrs += " data-starttime=\"#{CGI.escapeHTML(parts[3])}\""
+          end
+          if parts[4] && !parts[4].empty?
+            data_attrs += " data-duration=\"#{CGI.escapeHTML(parts[4])}\""
+          end
+        end
+      end
+      
+      "<div class=\"wrap-container\" #{data_attrs}>#{content}</div>"
+    end
+  end
 end
