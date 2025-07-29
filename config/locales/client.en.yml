@@ -16,9 +16,10 @@ en:
       startTime: "Start Time (GMT)"
       duration: "Duration (minutes)"
       errors:
-        missing_fields: "Start date, time, and duration are required."
+        missing_fields: "Start date and time are required."
         invalid_date: "Invalid date or time format."
         invalid_duration: "Duration must be a positive number."
+        past_date: "Start date cannot be in the past."
         not_started: "The meeting has not started yet."
         ended: "The meeting has already ended."
         create_failed: "Could not create meeting. Please try again."

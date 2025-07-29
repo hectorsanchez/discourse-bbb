@@ -4,8 +4,9 @@
   class="insert-bbb-modal">
   <:body>
     {{#if this.errorMsg}}
-      <div class="alert alert-error">{{this.errorMsg}}</div>
+      <div class="alert alert-error bbb-error-message">{{this.errorMsg}}</div>
     {{/if}}
+
     <!-- Campo para Meeting Name con límite de 30 caracteres -->
     <div class="control-group">
       <label>{{i18n "bbb.meetingName"}}</label>
@@ -19,28 +20,28 @@
       />
     </div>
 
-    <!-- Campo para Fecha de inicio -->
-    <div class="control-group">
-      <label>{{i18n "bbb.startDate"}}</label>
-      <input 
-        type="date" 
-        value={{this.startDate}} 
-        {{on "input" this.handleStartDateInput}}
-      />
+    <!-- Fecha y Hora en la misma fila -->
+    <div class="control-group bbb-datetime-row">
+      <div class="bbb-date-field">
+        <label>{{i18n "bbb.startDate"}}</label>
+        <input 
+          type="date" 
+          value={{this.startDate}} 
+          {{on "input" this.handleStartDateInput}}
+        />
+      </div>
+      <div class="bbb-time-field">
+        <label>{{i18n "bbb.startTime"}}</label>
+        <input 
+          type="time" 
+          value={{this.startTime}} 
+          {{on "input" this.handleStartTimeInput}}
+        />
+        <span class="help">GMT</span>
+      </div>
     </div>
 
-    <!-- Campo para Horario de inicio (GMT) -->
-    <div class="control-group">
-      <label>{{i18n "bbb.startTime"}}</label>
-      <input 
-        type="time" 
-        value={{this.startTime}} 
-        {{on "input" this.handleStartTimeInput}}
-      />
-      <span class="help">GMT</span>
-    </div>
-
-    <!-- Campo para Duración (en minutos) -->
+    <!-- Campo para Duración -->
     <div class="control-group">
       <label>{{i18n "bbb.duration"}}</label>
       <input 

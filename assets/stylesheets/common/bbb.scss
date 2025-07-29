@@ -10,3 +10,71 @@
 .bbb-button-text {
   margin-bottom: 1em;
 }
+
+// Estilos para el modal compacto
+.insert-bbb-modal {
+  .bbb-error-message {
+    margin-bottom: 1em;
+    font-size: 0.9em;
+    word-wrap: break-word;
+    max-height: 80px;
+    overflow-y: auto;
+  }
+
+  .bbb-datetime-row {
+    display: flex;
+    gap: 1em;
+    align-items: flex-end;
+
+    .bbb-date-field,
+    .bbb-time-field {
+      flex: 1;
+      min-width: 0;
+
+      label {
+        display: block;
+        margin-bottom: 0.5em;
+        font-weight: bold;
+      }
+
+      input {
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      .help {
+        font-size: 0.8em;
+        color: #666;
+        margin-left: 0.5em;
+      }
+    }
+  }
+
+  .control-group {
+    margin-bottom: 1em;
+
+    label {
+      display: block;
+      margin-bottom: 0.5em;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      box-sizing: border-box;
+    }
+  }
+
+  // Responsive para pantallas pequeñas
+  @media (max-width: 600px) {
+    .bbb-datetime-row {
+      flex-direction: column;
+      gap: 0.5em;
+
+      .bbb-date-field,
+      .bbb-time-field {
+        flex: none;
+      }
+    }
+  }
+}

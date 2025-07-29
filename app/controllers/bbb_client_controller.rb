@@ -12,10 +12,10 @@ module BigBlue
         # Validar y procesar los nuevos parámetros de fecha y duración
         start_date = params['startDate']
         start_time = params['startTime']
-        duration = params['duration']
+        duration = params['duration'] || '60' # Default 60 minutos
 
-        if start_date.blank? || start_time.blank? || duration.blank?
-          return render json: { error: 'Missing start date, time or duration' }, status: 422
+        if start_date.blank? || start_time.blank?
+          return render json: { error: 'Start date and time are required' }, status: 422
         end
 
         # Parsear fecha y hora en GMT
@@ -24,28 +24,50 @@ module BigBlue
         rescue ArgumentError
           return render json: { error: 'Invalid date or time format' }, status: 422
         end
+
+        # Validar que la fecha no sea anterior a hoy
+        today = Time.now.utc.to_date
+        if start_datetime.to_date < today
+          return render json: { error: 'Start date cannot be in the past' }, status: 422
+        end
+
         duration_minutes = duration.to_i
         if duration_minutes <= 0
-          return render json: { error: 'Invalid duration' }, status: 422
+          duration_minutes = 60 # Default a 60 minutos si es inválido
         end
+
         end_datetime = start_datetime + duration_minutes.minutes
         now = Time.now.utc
 
-        if now < start_datetime
-          return render json: { error: 'Meeting has not started yet' }, status: 403
-        elsif now > end_datetime
-          return render json: { error: 'Meeting has already ended' }, status: 403
-        end
-
-        # Nueva funcionalidad: crear meeting automáticamente
+        # Siempre crear el meeting, pero verificar acceso
         meeting_data = create_new_meeting(params, duration_minutes)
         return render json: { error: 'Could not create meeting' } unless meeting_data
+
+        # Solo permitir acceso si está dentro del rango
+        if now < start_datetime
+          return render json: { 
+            error: 'Meeting has not started yet',
+            meeting_id: meeting_data['meetingID'],
+            start_time: start_datetime.iso8601,
+            end_time: end_datetime.iso8601
+          }, status: 403
+        elsif now > end_datetime
+          return render json: { 
+            error: 'Meeting has already ended',
+            meeting_id: meeting_data['meetingID'],
+            start_time: start_datetime.iso8601,
+            end_time: end_datetime.iso8601
+          }, status: 403
+        end
+
+        # Si está dentro del rango, crear y unir
         url = create_and_join(meeting_data)
+        render json: { url: url }
       else
         # Funcionalidad existente: usar meeting ID proporcionado
         url = create_and_join(params)
+        render json: { url: url }
       end
-      render json: { url: url }
     end
 
     def status
