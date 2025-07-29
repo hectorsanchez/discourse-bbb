@@ -9,6 +9,33 @@ function launchBBB($elem) {
   const site = Discourse.__container__.lookup("site:main");
   const capabilities = Discourse.__container__.lookup("capabilities:main");
 
+  // Si es un meeting programado, validar acceso
+  if (data.startDate && data.startTime && data.duration) {
+    const startDate = data.startDate;
+    const startTime = data.startTime;
+    const duration = parseInt(data.duration) || 60;
+    
+    try {
+      const startDateTime = new Date(`${startDate} ${startTime} UTC`);
+      const endDateTime = new Date(startDateTime.getTime() + duration * 60000);
+      const now = new Date();
+      
+      if (now < startDateTime) {
+        // Meeting no ha comenzado
+        const startTimeStr = startDateTime.toLocaleString();
+        alert(`The meeting has not started yet. (Starts: ${startTimeStr})`);
+        return;
+      } else if (now > endDateTime) {
+        // Meeting ya terminó
+        const endTimeStr = endDateTime.toLocaleString();
+        alert(`The meeting has already ended. (Ended: ${endTimeStr})`);
+        return;
+      }
+    } catch (e) {
+      console.error("Error parsing meeting date/time:", e);
+    }
+  }
+
   ajax("/bbb/create.json", {
     type: "POST",
     data: data,
@@ -17,6 +44,8 @@ function launchBBB($elem) {
       if (res.url) {
         // Always open in new window due to X-Frame-Options
         window.open(res.url, "_blank");
+      } else if (res.error) {
+        alert(res.error);
       }
     })
     .catch(function (error) {

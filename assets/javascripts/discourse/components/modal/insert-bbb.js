@@ -70,8 +70,16 @@ export default class InsertBbbModal extends Component {
         type: "POST",
         data
       });
+      
       if (res.url) {
+        // Si hay URL, abrir inmediatamente (está dentro del rango)
         window.open(res.url, "_blank");
+        this.args.closeModal?.();
+      } else if (res.success) {
+        // Si se creó exitosamente pero está fuera del rango, insertar el botón
+        this.args.model.toolbarEvent.addText(
+          `[wrap=discourse-bbb mode="new" meetingName="${this.meetingName}" startDate="${this.startDate}" startTime="${this.startTime}" duration="${this.duration || '60'}"][/wrap]`
+        );
         this.args.closeModal?.();
       } else if (res.error) {
         this.errorMsg = this._errorMessage(res.error, res);

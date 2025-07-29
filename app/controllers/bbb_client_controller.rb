@@ -39,30 +39,26 @@ module BigBlue
         end_datetime = start_datetime + duration_minutes.minutes
         now = Time.now.utc
 
-        # Siempre crear el meeting, pero verificar acceso
+        # Siempre crear el meeting
         meeting_data = create_new_meeting(params, duration_minutes)
         return render json: { error: 'Could not create meeting' } unless meeting_data
 
-        # Solo permitir acceso si está dentro del rango
-        if now < start_datetime
-          return render json: { 
-            error: 'Meeting has not started yet',
+        # Verificar si está dentro del rango para acceso inmediato
+        if now >= start_datetime && now <= end_datetime
+          # Si está dentro del rango, crear y unir inmediatamente
+          url = create_and_join(meeting_data)
+          render json: { url: url }
+        else
+          # Si está fuera del rango, solo retornar éxito (el botón se creará)
+          # El acceso se validará cuando se haga clic en el botón
+          render json: { 
+            success: true,
             meeting_id: meeting_data['meetingID'],
             start_time: start_datetime.iso8601,
-            end_time: end_datetime.iso8601
-          }, status: 403
-        elsif now > end_datetime
-          return render json: { 
-            error: 'Meeting has already ended',
-            meeting_id: meeting_data['meetingID'],
-            start_time: start_datetime.iso8601,
-            end_time: end_datetime.iso8601
-          }, status: 403
+            end_time: end_datetime.iso8601,
+            message: now < start_datetime ? 'Meeting created successfully. Access will be available at the scheduled time.' : 'Meeting has already ended.'
+          }
         end
-
-        # Si está dentro del rango, crear y unir
-        url = create_and_join(meeting_data)
-        render json: { url: url }
       else
         # Funcionalidad existente: usar meeting ID proporcionado
         url = create_and_join(params)
