@@ -34,32 +34,33 @@ after_initialize do
     mount ::BigBlue::Engine, at: "/bbb"
   end
 
-  # Registrar el procesador de [wrap] BBCode
-  register_custom_html('post') do |doc, post|
-    # Buscar elementos que contengan [wrap...] BBCode
-    doc.css('p').each do |p|
-      next unless p.content =~ /\[wrap.*?\].*?\[\/wrap\]/m
-      
-      html_content = p.inner_html.gsub(/\[wrap([^\]]*)\](.*?)\[\/wrap\]/m) do |match|
-        attrs_string = $1.strip
-        content = $2.strip
+  # Procesar BBCode [wrap] en posts
+  on(:before_post_process_cooked) do |doc, post|
+    # Buscar y procesar BBCode [wrap] en texto crudo antes de cooking
+    if post.raw&.include?('[wrap')
+      # Procesar el contenido ya cooked (HTML)
+      doc.css('p').each do |p|
+        next unless p.inner_html =~ /\[wrap.*?\].*?\[\/wrap\]/m
         
-        # Parsear atributos del BBCode
-        data_attrs = {}
-        attrs_string.scan(/(\w+)="([^"]*)"/).each do |key, value|
-          data_attrs["data-#{key}"] = CGI.escapeHTML(value)
+        html_content = p.inner_html.gsub(/\[wrap([^\]]*)\](.*?)\[\/wrap\]/m) do |match|
+          attrs_string = $1.strip
+          content = $2.strip
+          
+          # Parsear atributos del BBCode
+          data_attrs = {}
+          attrs_string.scan(/(\w+)="([^"]*)"/).each do |key, value|
+            data_attrs["data-#{key}"] = CGI.escapeHTML(value)
+          end
+          
+          # Construir string de data attributes
+          data_attr_string = data_attrs.map { |k, v| "#{k}=\"#{v}\"" }.join(' ')
+          
+          # Retornar HTML convertido
+          "<div class=\"wrap-container\" #{data_attr_string}>#{content}</div>"
         end
         
-        # Construir string de data attributes
-        data_attr_string = data_attrs.map { |k, v| "#{k}=\"#{v}\"" }.join(' ')
-        
-        # Retornar HTML convertido
-        "<div class=\"wrap-container\" #{data_attr_string}>#{content}</div>"
+        p.inner_html = html_content
       end
-      
-      p.inner_html = html_content
     end
-    
-    doc
   end
 end
