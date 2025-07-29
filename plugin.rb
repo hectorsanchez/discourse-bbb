@@ -11,37 +11,6 @@ enabled_site_setting :bbb_enabled
 register_asset "stylesheets/common/bbb.scss"
 register_svg_icon "video"
 
-# Registrar el BBCode [wrap] 
-register_bbcode 'wrap' do |contents, args|
-  # Parsear argumentos separados por comas
-  # Formato: [wrap=discourse-bbb,meetingName,startDate,startTime,duration]
-  data_attrs = ''
-  
-  if args
-    parts = args.split(',')
-    if parts.length >= 1 && parts[0] == 'discourse-bbb'
-      data_attrs = 'data-wrap="discourse-bbb"'
-      
-      # Agregar atributos adicionales si existen
-      if parts[1] # meetingName
-        data_attrs += " data-meetingname=\"#{CGI.escapeHTML(parts[1])}\""
-      end
-      if parts[2] # startDate
-        data_attrs += " data-startdate=\"#{CGI.escapeHTML(parts[2])}\""
-      end
-      if parts[3] # startTime  
-        data_attrs += " data-starttime=\"#{CGI.escapeHTML(parts[3])}\""
-      end
-      if parts[4] # duration
-        data_attrs += " data-duration=\"#{CGI.escapeHTML(parts[4])}\""
-      end
-    end
-  end
-  
-  # Retornar HTML
-  "<div class=\"wrap-container\" #{data_attrs}>#{contents}</div>"
-end
-
 after_initialize do
   [
     "../app/controllers/bbb_client_controller",
@@ -63,5 +32,44 @@ after_initialize do
 
   Discourse::Application.routes.append do
     mount ::BigBlue::Engine, at: "/bbb"
+  end
+
+  # Procesar BBCode [wrap] en posts usando el hook correcto
+  on(:before_post_process_cooked) do |doc, post|
+    # Buscar y procesar BBCode [wrap] en el contenido raw del post
+    if post.raw&.include?('[wrap')
+      # Procesar contenido raw antes de que se convierta a HTML
+      post.raw.gsub!(/\[wrap=([^\]]*)\](.*?)\[\/wrap\]/m) do |match|
+        args = $1
+        content = $2.strip
+        
+        # Parsear argumentos separados por comas
+        data_attrs = ''
+        
+        if args
+          parts = args.split(',')
+          if parts.length >= 1 && parts[0] == 'discourse-bbb'
+            data_attrs = 'data-wrap="discourse-bbb"'
+            
+            # Agregar atributos adicionales si existen
+            if parts[1] && !parts[1].empty? # meetingName
+              data_attrs += " data-meetingname=\"#{CGI.escapeHTML(parts[1])}\""
+            end
+            if parts[2] && !parts[2].empty? # startDate
+              data_attrs += " data-startdate=\"#{CGI.escapeHTML(parts[2])}\""
+            end
+            if parts[3] && !parts[3].empty? # startTime  
+              data_attrs += " data-starttime=\"#{CGI.escapeHTML(parts[3])}\""
+            end
+            if parts[4] && !parts[4].empty? # duration
+              data_attrs += " data-duration=\"#{CGI.escapeHTML(parts[4])}\""
+            end
+          end
+        end
+        
+        # Retornar HTML que reemplaza el BBCode
+        "<div class=\"wrap-container\" #{data_attrs}>#{content}</div>"
+      end
+    end
   end
 end
