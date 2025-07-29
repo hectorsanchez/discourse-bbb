@@ -77,9 +77,10 @@ export default class InsertBbbModal extends Component {
         this.args.closeModal?.();
       } else if (res.success) {
         // Si se creó exitosamente pero está fuera del rango, insertar el botón
-        this.args.model.toolbarEvent.addText(
-          `[wrap=discourse-bbb,${this.meetingName},${this.startDate},${this.startTime},${this.duration || '60'}]Join Meeting: ${this.meetingName}[/wrap]`
-        );
+        // Generar HTML directo en lugar de BBCode para evitar problemas con el parser
+        const htmlContent = `<div class="wrap-container" data-wrap="discourse-bbb" data-meetingname="${this.meetingName}" data-startdate="${this.startDate}" data-starttime="${this.startTime}" data-duration="${this.duration || '60'}">Join Meeting: ${this.meetingName}</div>`;
+        
+        this.args.model.toolbarEvent.addText(htmlContent);
         this.args.closeModal?.();
       } else if (res.error) {
         this.errorMsg = this._errorMessage(res.error, res);
