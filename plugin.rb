@@ -33,4 +33,13 @@ after_initialize do
   Discourse::Application.routes.append do
     mount ::BigBlue::Engine, at: "/bbb"
   end
+
+  # Registrar el token 'wrap' para el parser de Markdown
+  on(:post_process_cooked) do |doc, post|
+    doc.css('div[data-wrap="discourse-bbb"]').each do |element|
+      # El contenido ya está procesado por el initializer de JavaScript
+      # Solo necesitamos asegurar que el elemento tenga la clase correcta
+      element.add_class('bbb-meeting-container')
+    end
+  end
 end

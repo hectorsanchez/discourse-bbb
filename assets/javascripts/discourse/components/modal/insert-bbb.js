@@ -78,7 +78,7 @@ export default class InsertBbbModal extends Component {
       } else if (res.success) {
         // Si se creó exitosamente pero está fuera del rango, insertar el botón
         this.args.model.toolbarEvent.addText(
-          `[wrap=discourse-bbb mode="new" meetingName="${this.meetingName}" startDate="${this.startDate}" startTime="${this.startTime}" duration="${this.duration || '60'}"][/wrap]`
+          `[wrap data-wrap="discourse-bbb" mode="new" meetingName="${this.meetingName}" startDate="${this.startDate}" startTime="${this.startTime}" duration="${this.duration || '60'}"]Join Meeting: ${this.meetingName}[/wrap]`
         );
         this.args.closeModal?.();
       } else if (res.error) {
