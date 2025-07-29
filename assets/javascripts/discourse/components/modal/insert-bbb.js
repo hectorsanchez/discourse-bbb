@@ -2,7 +2,7 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { isEmpty } from "@ember/utils";
-import I18n from "@ember/locales/i18n";
+import I18n from "I18n";
 import { ajax } from "discourse/lib/ajax";
 
 export default class InsertBbbModal extends Component {
