@@ -93,7 +93,7 @@ function attachStatus($elem, helper) {
 
 function attachBBB($elem, helper) {
   if (helper) {
-    $elem.find("[data-wrap='discourse-bbb']").each((idx, val) => {
+    $elem.find(".wrap-container[data-wrap='discourse-bbb']").each((idx, val) => {
       attachButton($(val));
       $(val).append("<span class='bbb-status'></span>");
       attachStatus($(val), helper);

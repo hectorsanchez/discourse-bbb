@@ -35,11 +35,23 @@ after_initialize do
   end
 
   # Registrar el token 'wrap' para el parser de Markdown
-  on(:post_process_cooked) do |doc, post|
-    doc.css('div[data-wrap="discourse-bbb"]').each do |element|
-      # El contenido ya está procesado por el initializer de JavaScript
-      # Solo necesitamos asegurar que el elemento tenga la clase correcta
-      element.add_class('bbb-meeting-container')
+  register_html_builder('post') do |context|
+    if context.post.raw.include?('[wrap')
+      context.raw.gsub!(/\[wrap([^\]]*)\](.*?)\[\/wrap\]/m) do |match|
+        attrs = $1.strip
+        content = $2.strip
+        
+        # Parsear atributos
+        data_attrs = {}
+        attrs.scan(/(\w+)="([^"]*)"/).each do |key, value|
+          data_attrs["data-#{key}"] = value
+        end
+        
+        # Construir el HTML
+        data_attr_string = data_attrs.map { |k, v| "#{k}=\"#{v}\"" }.join(' ')
+        "<div class=\"wrap-container\" #{data_attr_string}>#{content}</div>"
+      end
     end
+    context.raw
   end
 end
