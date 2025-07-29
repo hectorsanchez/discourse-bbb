@@ -34,47 +34,50 @@ after_initialize do
     mount ::BigBlue::Engine, at: "/bbb"
   end
 
-  # Registrar el BBCode [wrap] usando la API moderna de Discourse 3.5.0
-  # Usamos el mecanismo de markdown allowlist personalizado
+  # Usar un enfoque más básico que funciona en Discourse 3.5.0.beta8-dev
+  # Procesar el BBCode después de que se haya creado el HTML
   
-  # Primero, agregamos el elemento a la allowlist
-  allowlist_elements = %w[div]
-  allowlist_attributes = {
-    "div" => %w[class data-wrap data-meetingname data-startdate data-starttime data-duration data-mode]
-  }
-  
-  # Registrar el procesador de markdown personalizado
-  DiscoursePluginRegistry.register_markdown_processor(
-    "bbb_wrap",
-    priority: 100
-  ) do |text|
-    text.gsub(/\[wrap=([^\]]*)\](.*?)\[\/wrap\]/m) do |match|
-      args = $1
-      content = $2.strip
+  on(:post_process_cooked) do |doc, post|
+    # Buscar elementos <p> que contengan nuestro BBCode
+    doc.css('p').each do |paragraph|
+      content = paragraph.inner_html
       
-      # Parsear argumentos
-      data_attrs = ''
-      if args
-        parts = args.split(',')
-        if parts.length >= 1 && parts[0] == 'discourse-bbb'
-          data_attrs = 'data-wrap="discourse-bbb"'
+      # Si contiene nuestro BBCode, procesarlo
+      if content.include?('[wrap=') && content.include?('[/wrap]')
+        new_content = content.gsub(/\[wrap=([^\]]*)\](.*?)\[\/wrap\]/m) do |match|
+          args = $1
+          inner_content = $2.strip
           
-          if parts[1] && !parts[1].empty?
-            data_attrs += " data-meetingname=\"#{CGI.escapeHTML(parts[1])}\""
+          # Parsear argumentos
+          data_attrs = ''
+          if args
+            parts = args.split(',')
+            if parts.length >= 1 && parts[0] == 'discourse-bbb'
+              data_attrs = 'data-wrap="discourse-bbb"'
+              
+              if parts[1] && !parts[1].empty?
+                data_attrs += " data-meetingname=\"#{CGI.escapeHTML(parts[1])}\""
+              end
+              if parts[2] && !parts[2].empty?
+                data_attrs += " data-startdate=\"#{CGI.escapeHTML(parts[2])}\""
+              end
+              if parts[3] && !parts[3].empty?
+                data_attrs += " data-starttime=\"#{CGI.escapeHTML(parts[3])}\""
+              end
+              if parts[4] && !parts[4].empty?
+                data_attrs += " data-duration=\"#{CGI.escapeHTML(parts[4])}\""
+              end
+            end
           end
-          if parts[2] && !parts[2].empty?
-            data_attrs += " data-startdate=\"#{CGI.escapeHTML(parts[2])}\""
-          end
-          if parts[3] && !parts[3].empty?
-            data_attrs += " data-starttime=\"#{CGI.escapeHTML(parts[3])}\""
-          end
-          if parts[4] && !parts[4].empty?
-            data_attrs += " data-duration=\"#{CGI.escapeHTML(parts[4])}\""
-          end
+          
+          "<div class=\"wrap-container\" #{data_attrs}>#{inner_content}</div>"
+        end
+        
+        # Reemplazar el contenido del párrafo si cambió
+        if new_content != content
+          paragraph.inner_html = new_content
         end
       end
-      
-      "<div class=\"wrap-container\" #{data_attrs}>#{content}</div>"
     end
   end
 end
