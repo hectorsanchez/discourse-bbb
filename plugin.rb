@@ -38,33 +38,33 @@ after_initialize do
   # Procesar el BBCode después de que se haya creado el HTML
   
   on(:post_process_cooked) do |doc, post|
-    # Buscar elementos <p> que contengan nuestro BBCode
+    # Buscar elementos que contengan nuestros marcadores shortcode
     doc.css('p').each do |paragraph|
       content = paragraph.inner_html
       
-      # Si contiene nuestro BBCode, procesarlo
-      if content.include?('[wrap=') && content.include?('[/wrap]')
-        new_content = content.gsub(/\[wrap=([^\]]*)\](.*?)\[\/wrap\]/m) do |match|
-          args = $1
+      # Si contiene nuestros marcadores BBB-MEETING, procesarlos
+      if content.include?('{{BBB-MEETING:') && content.include?('{{/BBB-MEETING}}')
+        new_content = content.gsub(/\{\{BBB-MEETING:([^}]*)\}\}(.*?)\{\{\/BBB-MEETING\}\}/m) do |match|
+          meeting_data = $1
           inner_content = $2.strip
           
-          # Parsear argumentos
+          # Parsear datos del meeting usando pipe separator
           data_attrs = ''
-          if args
-            parts = args.split(',')
+          if meeting_data
+            parts = meeting_data.split('|')
             if parts.length >= 1 && parts[0] == 'discourse-bbb'
               data_attrs = 'data-wrap="discourse-bbb"'
               
-              if parts[1] && !parts[1].empty?
+              if parts[1] && !parts[1].empty? # meetingName
                 data_attrs += " data-meetingname=\"#{CGI.escapeHTML(parts[1])}\""
               end
-              if parts[2] && !parts[2].empty?
+              if parts[2] && !parts[2].empty? # startDate
                 data_attrs += " data-startdate=\"#{CGI.escapeHTML(parts[2])}\""
               end
-              if parts[3] && !parts[3].empty?
+              if parts[3] && !parts[3].empty? # startTime
                 data_attrs += " data-starttime=\"#{CGI.escapeHTML(parts[3])}\""
               end
-              if parts[4] && !parts[4].empty?
+              if parts[4] && !parts[4].empty? # duration
                 data_attrs += " data-duration=\"#{CGI.escapeHTML(parts[4])}\""
               end
             end

@@ -76,10 +76,11 @@ export default class InsertBbbModal extends Component {
         window.open(res.url, "_blank");
         this.args.closeModal?.();
       } else if (res.success) {
-        // Si se creó exitosamente pero está fuera del rango, insertar BBCode
-        // Ahora debería funcionar con el procesador de markdown registrado
+        // Si se creó exitosamente pero está fuera del rango, insertar marcador único
+        // Usar formato que NO active ningún conversor de Discourse
+        const meetingData = `discourse-bbb|${this.meetingName}|${this.startDate}|${this.startTime}|${this.duration || '60'}`;
         this.args.model.toolbarEvent.addText(
-          `[wrap=discourse-bbb,${this.meetingName},${this.startDate},${this.startTime},${this.duration || '60'}]Join Meeting: ${this.meetingName}[/wrap]`
+          `{{BBB-MEETING:${meetingData}}}Join Meeting: ${this.meetingName}{{/BBB-MEETING}}`
         );
         this.args.closeModal?.();
       } else if (res.error) {
