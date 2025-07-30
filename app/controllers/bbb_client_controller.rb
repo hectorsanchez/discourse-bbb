@@ -141,7 +141,8 @@ module BigBlue
         endWhenNoModerator: false,  # Meeting NO se cierra si no hay moderador
         autoStartRecording: false,  # No iniciar grabación automática
         allowStartStopRecording: true,  # Permitir control de grabación manual
-        record: false  # No grabar por defecto
+        record: false,  # No grabar por defecto
+        noAnswerTimeout: 0  # No eliminar la reunión si nadie entra
       }
       
       query = create_params.map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join('&')
