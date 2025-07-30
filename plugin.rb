@@ -78,17 +78,14 @@ after_initialize do
               if parts[3] && !parts[3].empty? # startTime
                 data_attrs += " data-starttime=\"#{CGI.escapeHTML(parts[3])}\""
               end
-              if parts[4] && !parts[4].empty? # duration
-                data_attrs += " data-duration=\"#{CGI.escapeHTML(parts[4])}\""
+              if parts[4] && !parts[4].empty? # meeting_id
+                data_attrs += " data-meetingid=\"#{CGI.escapeHTML(parts[4])}\""
               end
-              if parts[5] && !parts[5].empty? # meeting_id
-                data_attrs += " data-meetingid=\"#{CGI.escapeHTML(parts[5])}\""
+              if parts[5] && !parts[5].empty? # attendee_pw
+                data_attrs += " data-attendeepw=\"#{CGI.escapeHTML(parts[5])}\""
               end
-              if parts[6] && !parts[6].empty? # attendee_pw
-                data_attrs += " data-attendeepw=\"#{CGI.escapeHTML(parts[6])}\""
-              end
-              if parts[7] && !parts[7].empty? # moderator_pw
-                data_attrs += " data-moderatorpw=\"#{CGI.escapeHTML(parts[7])}\""
+              if parts[6] && !parts[6].empty? # moderator_pw
+                data_attrs += " data-moderatorpw=\"#{CGI.escapeHTML(parts[6])}\""
               end
             end
           end

@@ -9,15 +9,13 @@ function launchBBB($elem) {
   const site = Discourse.__container__.lookup("site:main");
   const capabilities = Discourse.__container__.lookup("capabilities:main");
 
-  // Si es un meeting programado, validar acceso
-  if (data.startdate && data.starttime && data.duration) {
+  // Si es un meeting programado, validar acceso (solo fecha de inicio, sin límite de duración)
+  if (data.startdate && data.starttime) {
     const startDate = data.startdate;
     const startTime = data.starttime;
-    const duration = parseInt(data.duration) || 60;
     
     try {
       const startDateTime = new Date(`${startDate} ${startTime} UTC`);
-      const endDateTime = new Date(startDateTime.getTime() + duration * 60000);
       const now = new Date();
       
       if (now < startDateTime) {
@@ -25,12 +23,8 @@ function launchBBB($elem) {
         const startTimeStr = startDateTime.toLocaleString();
         alert(`The meeting has not started yet. (Starts: ${startTimeStr})`);
         return;
-      } else if (now > endDateTime) {
-        // Meeting ya terminó
-        const endTimeStr = endDateTime.toLocaleString();
-        alert(`The meeting has already ended. (Ended: ${endTimeStr})`);
-        return;
       }
+      // Sin validación de fin - meetings sin límite de tiempo
     } catch (e) {
       console.error("Error parsing meeting date/time:", e);
     }
@@ -51,7 +45,6 @@ function launchBBB($elem) {
     requestData.meetingName = data.meetingname || "Discourse Meeting";
     requestData.startDate = data.startdate;
     requestData.startTime = data.starttime;
-    requestData.duration = data.duration || "60";
   }
 
   ajax("/bbb/create.json", {

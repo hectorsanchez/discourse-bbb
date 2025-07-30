@@ -9,7 +9,6 @@ export default class InsertBbbModal extends Component {
   @tracked meetingName = "";
   @tracked startDate = "";
   @tracked startTime = "";
-  @tracked duration = "";
   @tracked errorMsg = "";
   @tracked commitHash = "";
 
@@ -31,8 +30,6 @@ export default class InsertBbbModal extends Component {
       isEmpty(this.meetingName) ||
       isEmpty(this.startDate) ||
       isEmpty(this.startTime) ||
-      isNaN(Number(this.duration)) ||
-      Number(this.duration) < 0 ||
       this.isDateTimeInPast
     );
   }
@@ -97,17 +94,7 @@ export default class InsertBbbModal extends Component {
     }
   }
 
-  @action
-  handleDurationInput(event) {
-    const value = event.target.value;
-    // Solo permitir números positivos
-    if (Number(value) < 1) {
-      this.duration = "";
-      event.target.value = "";
-    } else {
-      this.duration = value;
-    }
-  }
+
 
   @action
   async insert() {
@@ -124,8 +111,7 @@ export default class InsertBbbModal extends Component {
         mode: "new",
         meetingName: this.meetingName,
         startDate: this.startDate,
-        startTime: this.startTime,
-        duration: this.duration || "60" // Default 60 minutos si está vacío
+        startTime: this.startTime
       };
       const res = await ajax("/bbb/create.json", {
         type: "POST",
@@ -138,7 +124,7 @@ export default class InsertBbbModal extends Component {
         
         // Si también hay success=true, crear el botón además de abrir
         if (res.success) {
-          const meetingData = `discourse-bbb|${this.meetingName}|${this.startDate}|${this.startTime}|${this.duration || '60'}|${res.meeting_id}|${res.attendee_pw}|${res.moderator_pw}`;
+          const meetingData = `discourse-bbb|${this.meetingName}|${this.startDate}|${this.startTime}|${res.meeting_id}|${res.attendee_pw}|${res.moderator_pw}`;
           this.args.model.toolbarEvent.addText(
             `{{BBB-MEETING:${meetingData}}}Join Meeting: ${this.meetingName}{{/BBB-MEETING}}`
           );
@@ -149,7 +135,7 @@ export default class InsertBbbModal extends Component {
         // Si se creó exitosamente pero está fuera del rango, insertar marcador único
         // Usar formato que NO active ningún conversor de Discourse
         // IMPORTANTE: Incluir meeting_id Y passwords del servidor para poder unirse después
-        const meetingData = `discourse-bbb|${this.meetingName}|${this.startDate}|${this.startTime}|${this.duration || '60'}|${res.meeting_id}|${res.attendee_pw}|${res.moderator_pw}`;
+        const meetingData = `discourse-bbb|${this.meetingName}|${this.startDate}|${this.startTime}|${res.meeting_id}|${res.attendee_pw}|${res.moderator_pw}`;
         this.args.model.toolbarEvent.addText(
           `{{BBB-MEETING:${meetingData}}}Join Meeting: ${this.meetingName}{{/BBB-MEETING}}`
         );

@@ -9,10 +9,9 @@ module BigBlue
 
     def create
       if params['mode'] == 'new'
-        # Validar y procesar los nuevos parámetros de fecha y duración
+        # Validar y procesar los nuevos parámetros de fecha
         start_date = params['startDate']
         start_time = params['startTime']
-        duration = params['duration'] || '60' # Default 60 minutos
 
         if start_date.blank? || start_time.blank?
           return render json: { error: 'Start date and time are required' }, status: 422
@@ -31,20 +30,14 @@ module BigBlue
           return render json: { error: 'Start date cannot be in the past' }, status: 422
         end
 
-        duration_minutes = duration.to_i
-        if duration_minutes <= 0
-          duration_minutes = 60 # Default a 60 minutos si es inválido
-        end
-
-        end_datetime = start_datetime + duration_minutes.minutes
         now = Time.now.utc
 
-        # Siempre crear el meeting
-        meeting_data = create_new_meeting(params, duration_minutes)
+        # Siempre crear el meeting (sin límite de duración)
+        meeting_data = create_new_meeting(params)
         return render json: { error: 'Could not create meeting' } unless meeting_data
 
-        # Verificar si está dentro del rango para acceso inmediato
-        if now >= start_datetime && now <= end_datetime
+        # Verificar si está dentro del rango para acceso inmediato (solo inicio, sin fin)
+        if now >= start_datetime
           # Si está dentro del rango, crear y unir inmediatamente PERO también devolver datos para el botón
           url = create_and_join(meeting_data)
           render json: { 
@@ -54,7 +47,6 @@ module BigBlue
             attendee_pw: meeting_data['attendeePW'],
             moderator_pw: meeting_data['moderatorPW'],
             start_time: start_datetime.iso8601,
-            end_time: end_datetime.iso8601,
             message: 'Meeting is now active. Opening immediately and creating button for future access.'
           }
         else
@@ -66,8 +58,7 @@ module BigBlue
             attendee_pw: meeting_data['attendeePW'],
             moderator_pw: meeting_data['moderatorPW'],
             start_time: start_datetime.iso8601,
-            end_time: end_datetime.iso8601,
-            message: now < start_datetime ? 'Meeting created successfully. Access will be available at the scheduled time.' : 'Meeting has already ended.'
+            message: 'Meeting created successfully. Access will be available at the scheduled time.'
           }
         end
       elsif params['mode'] == 'existing' && params['meetingID']
@@ -134,7 +125,7 @@ module BigBlue
       build_url("join", join_params)
     end
 
-    def create_new_meeting(args, duration_minutes = nil)
+    def create_new_meeting(args)
       return false unless SiteSetting.bbb_endpoint && SiteSetting.bbb_secret
       meeting_id = "discourse-#{SecureRandom.hex(8)}-#{Time.now.to_i}"
       attendee_pw = SecureRandom.hex(8)
@@ -145,10 +136,10 @@ module BigBlue
         attendeePW: attendee_pw,
         moderatorPW: moderator_pw,
         logoutURL: Discourse.base_url,
-        welcome: "Welcome to the Discourse meeting!"
+        welcome: "Welcome to the Discourse meeting!",
+        endWhenNoModerator: false  # Meeting no se cierra si no hay moderador
       }
-      # Agregar duración si está presente
-      create_params[:duration] = duration_minutes if duration_minutes
+      
       query = create_params.map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join('&')
       secret = SiteSetting.bbb_secret
       checksum = Digest::SHA1.hexdigest("create" + query + secret)
