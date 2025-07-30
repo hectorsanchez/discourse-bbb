@@ -92,7 +92,8 @@ export default class InsertBbbModal extends Component {
       } else if (res.success) {
         // Si se creó exitosamente pero está fuera del rango, insertar marcador único
         // Usar formato que NO active ningún conversor de Discourse
-        const meetingData = `discourse-bbb|${this.meetingName}|${this.startDate}|${this.startTime}|${this.duration || '60'}`;
+        // IMPORTANTE: Incluir meeting_id del servidor para poder unirse después
+        const meetingData = `discourse-bbb|${this.meetingName}|${this.startDate}|${this.startTime}|${this.duration || '60'}|${res.meeting_id}`;
         this.args.model.toolbarEvent.addText(
           `{{BBB-MEETING:${meetingData}}}Join Meeting: ${this.meetingName}{{/BBB-MEETING}}`
         );

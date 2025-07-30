@@ -10,9 +10,9 @@ function launchBBB($elem) {
   const capabilities = Discourse.__container__.lookup("capabilities:main");
 
   // Si es un meeting programado, validar acceso
-  if (data.startDate && data.startTime && data.duration) {
-    const startDate = data.startDate;
-    const startTime = data.startTime;
+  if (data.startdate && data.starttime && data.duration) {
+    const startDate = data.startdate;
+    const startTime = data.starttime;
     const duration = parseInt(data.duration) || 60;
     
     try {
@@ -36,9 +36,25 @@ function launchBBB($elem) {
     }
   }
 
+  // Preparar datos para el backend
+  const requestData = {};
+  
+  if (data.meetingid) {
+    // Es un meeting existente - usar el meeting ID
+    requestData.meetingID = data.meetingid;
+    requestData.mode = "existing";
+  } else {
+    // Fallback - crear nuevo meeting (modo legacy)
+    requestData.mode = "new";
+    requestData.meetingName = data.meetingname || "Discourse Meeting";
+    requestData.startDate = data.startdate;
+    requestData.startTime = data.starttime;
+    requestData.duration = data.duration || "60";
+  }
+
   ajax("/bbb/create.json", {
     type: "POST",
-    data: data,
+    data: requestData,
   })
     .then((res) => {
       if (res.url) {

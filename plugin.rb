@@ -81,6 +81,9 @@ after_initialize do
               if parts[4] && !parts[4].empty? # duration
                 data_attrs += " data-duration=\"#{CGI.escapeHTML(parts[4])}\""
               end
+              if parts[5] && !parts[5].empty? # meeting_id
+                data_attrs += " data-meetingid=\"#{CGI.escapeHTML(parts[5])}\""
+              end
             end
           end
           

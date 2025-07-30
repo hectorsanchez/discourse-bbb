@@ -59,8 +59,12 @@ module BigBlue
             message: now < start_datetime ? 'Meeting created successfully. Access will be available at the scheduled time.' : 'Meeting has already ended.'
           }
         end
+      elsif params['mode'] == 'existing' && params['meetingID']
+        # Unirse a meeting existente usando meeting ID
+        url = join_existing_meeting(params['meetingID'])
+        render json: { url: url }
       else
-        # Funcionalidad existente: usar meeting ID proporcionado
+        # Funcionalidad existente: usar meeting ID proporcionado (modo legacy)
         url = create_and_join(params)
         render json: { url: url }
       end
@@ -71,6 +75,22 @@ module BigBlue
     end
 
     private
+
+    def join_existing_meeting(meeting_id)
+      return false unless SiteSetting.bbb_endpoint && SiteSetting.bbb_secret
+      
+      # Construir URL de join directamente usando el meeting_id
+      # Para meetings creados por create_new_meeting, no necesitamos password
+      join_params = {
+        fullName: current_user.name || current_user.username,
+        meetingID: meeting_id,
+        userID: current_user.username,
+        # Para meetings auto-creados, usar meeting_id como password (método simple)
+        password: meeting_id.split('-').last  # Usar parte del ID como password simple
+      }.to_query
+
+      build_url("join", join_params)
+    end
 
     def create_and_join(args)
       return false unless SiteSetting.bbb_endpoint && SiteSetting.bbb_secret
