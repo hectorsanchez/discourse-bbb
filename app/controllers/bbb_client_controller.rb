@@ -137,29 +137,41 @@ module BigBlue
         moderatorPW: moderator_pw,
         logoutURL: Discourse.base_url,
         welcome: "Welcome to the Discourse meeting!",
-        endWhenNoModerator: false  # Meeting no se cierra si no hay moderador
+        duration: 0,  # 0 = duración indefinida (sin límite de tiempo)
+        endWhenNoModerator: false,  # Meeting NO se cierra si no hay moderador
+        autoStartRecording: false,  # No iniciar grabación automática
+        allowStartStopRecording: true,  # Permitir control de grabación manual
+        record: false  # No grabar por defecto
       }
       
       query = create_params.map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join('&')
       secret = SiteSetting.bbb_secret
       checksum = Digest::SHA1.hexdigest("create" + query + secret)
       create_url = "#{SiteSetting.bbb_endpoint}create?#{query}&checksum=#{checksum}"
+      
+      # Log para debug - verificar parámetros enviados
+      Rails.logger.info("Creating BBB meeting with params: #{create_params.inspect}")
+      Rails.logger.info("BBB create URL (without secret): #{SiteSetting.bbb_endpoint}create?#{query}")
+      
       response = Excon.get(create_url)
       if response.status == 200
         data = Hash.from_xml(response.body)
+        Rails.logger.info("BBB create response: #{data.inspect}")
+        
         if data['response']['returncode'] == "SUCCESS"
-          Rails.logger.info("New BBB meeting created: #{meeting_id}")
+          Rails.logger.info("New BBB meeting created successfully: #{meeting_id} with duration=0 (infinite)")
           {
             'meetingID' => meeting_id,
             'attendeePW' => attendee_pw,
             'moderatorPW' => moderator_pw
           }
         else
-          Rails.logger.warn("BBB meeting creation failed: #{data['response']['message']}")
+          Rails.logger.error("BBB meeting creation failed: #{data['response']['message']}")
+          Rails.logger.error("Full BBB error response: #{data.inspect}")
           false
         end
       else
-        Rails.logger.warn("Could not create BBB meeting: HTTP #{response.status}")
+        Rails.logger.error("Could not create BBB meeting: HTTP #{response.status}, Body: #{response.body}")
         false
       end
     end
