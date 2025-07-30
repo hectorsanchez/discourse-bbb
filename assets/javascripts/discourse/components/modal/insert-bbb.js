@@ -32,8 +32,40 @@ export default class InsertBbbModal extends Component {
       isEmpty(this.startDate) ||
       isEmpty(this.startTime) ||
       isNaN(Number(this.duration)) ||
-      Number(this.duration) < 0
+      Number(this.duration) < 0 ||
+      this.isDateTimeInPast
     );
+  }
+
+  get isDateTimeInPast() {
+    if (isEmpty(this.startDate) || isEmpty(this.startTime)) {
+      return false; // No validar si faltan datos
+    }
+
+    try {
+      const selectedDateTime = new Date(`${this.startDate} ${this.startTime}`);
+      const now = new Date();
+      
+      // Agregar 1 minuto de buffer para evitar problemas de timing
+      const nowWithBuffer = new Date(now.getTime() + 60000);
+      
+      return selectedDateTime < nowWithBuffer;
+    } catch (e) {
+      return true; // Si hay error en parsing, considerar inválido
+    }
+  }
+
+  get dateTimeValidationMessage() {
+    if (this.isDateTimeInPast && !isEmpty(this.startDate) && !isEmpty(this.startTime)) {
+      return "Meeting date and time cannot be in the past";
+    }
+    return "";
+  }
+
+  get todayDate() {
+    // Retornar fecha de hoy en formato YYYY-MM-DD para el input date
+    const today = new Date();
+    return today.toISOString().split('T')[0];
   }
 
   @action
@@ -50,11 +82,19 @@ export default class InsertBbbModal extends Component {
   @action
   handleStartDateInput(event) {
     this.startDate = event.target.value;
+    // Limpiar error previo si había
+    if (this.errorMsg.includes("date")) {
+      this.errorMsg = "";
+    }
   }
 
   @action
   handleStartTimeInput(event) {
     this.startTime = event.target.value;
+    // Limpiar error previo si había
+    if (this.errorMsg.includes("time")) {
+      this.errorMsg = "";
+    }
   }
 
   @action
@@ -72,6 +112,13 @@ export default class InsertBbbModal extends Component {
   @action
   async insert() {
     this.errorMsg = "";
+    
+    // Validación adicional antes de enviar
+    if (this.isDateTimeInPast) {
+      this.errorMsg = this.dateTimeValidationMessage;
+      return;
+    }
+    
     try {
       const data = {
         mode: "new",
@@ -88,12 +135,21 @@ export default class InsertBbbModal extends Component {
       if (res.url) {
         // Si hay URL, abrir inmediatamente (está dentro del rango)
         window.open(res.url, "_blank");
+        
+        // Si también hay success=true, crear el botón además de abrir
+        if (res.success) {
+          const meetingData = `discourse-bbb|${this.meetingName}|${this.startDate}|${this.startTime}|${this.duration || '60'}|${res.meeting_id}|${res.attendee_pw}|${res.moderator_pw}`;
+          this.args.model.toolbarEvent.addText(
+            `{{BBB-MEETING:${meetingData}}}Join Meeting: ${this.meetingName}{{/BBB-MEETING}}`
+          );
+        }
+        
         this.args.closeModal?.();
       } else if (res.success) {
         // Si se creó exitosamente pero está fuera del rango, insertar marcador único
         // Usar formato que NO active ningún conversor de Discourse
-        // IMPORTANTE: Incluir meeting_id del servidor para poder unirse después
-        const meetingData = `discourse-bbb|${this.meetingName}|${this.startDate}|${this.startTime}|${this.duration || '60'}|${res.meeting_id}`;
+        // IMPORTANTE: Incluir meeting_id Y passwords del servidor para poder unirse después
+        const meetingData = `discourse-bbb|${this.meetingName}|${this.startDate}|${this.startTime}|${this.duration || '60'}|${res.meeting_id}|${res.attendee_pw}|${res.moderator_pw}`;
         this.args.model.toolbarEvent.addText(
           `{{BBB-MEETING:${meetingData}}}Join Meeting: ${this.meetingName}{{/BBB-MEETING}}`
         );

@@ -27,6 +27,7 @@
         <input 
           type="date" 
           value={{this.startDate}} 
+          min={{this.todayDate}}
           {{on "input" this.handleStartDateInput}}
         />
       </div>
@@ -40,6 +41,15 @@
         <span class="help">GMT</span>
       </div>
     </div>
+
+    <!-- Mensaje de validación de fecha/hora -->
+    {{#if this.dateTimeValidationMessage}}
+      <div class="control-group">
+        <div class="alert alert-warning" style="margin-top: 10px; font-size: 14px;">
+          ⚠️ {{this.dateTimeValidationMessage}}
+        </div>
+      </div>
+    {{/if}}
 
     <!-- Campo para Duración -->
     <div class="control-group">

@@ -40,8 +40,10 @@ function launchBBB($elem) {
   const requestData = {};
   
   if (data.meetingid) {
-    // Es un meeting existente - usar el meeting ID
+    // Es un meeting existente - usar el meeting ID y passwords guardados
     requestData.meetingID = data.meetingid;
+    requestData.attendeePW = data.attendeepw || '';
+    requestData.moderatorPW = data.moderatorpw || '';
     requestData.mode = "existing";
   } else {
     // Fallback - crear nuevo meeting (modo legacy)

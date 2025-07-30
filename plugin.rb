@@ -84,6 +84,12 @@ after_initialize do
               if parts[5] && !parts[5].empty? # meeting_id
                 data_attrs += " data-meetingid=\"#{CGI.escapeHTML(parts[5])}\""
               end
+              if parts[6] && !parts[6].empty? # attendee_pw
+                data_attrs += " data-attendeepw=\"#{CGI.escapeHTML(parts[6])}\""
+              end
+              if parts[7] && !parts[7].empty? # moderator_pw
+                data_attrs += " data-moderatorpw=\"#{CGI.escapeHTML(parts[7])}\""
+              end
             end
           end
           

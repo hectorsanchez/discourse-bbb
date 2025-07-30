@@ -45,23 +45,34 @@ module BigBlue
 
         # Verificar si está dentro del rango para acceso inmediato
         if now >= start_datetime && now <= end_datetime
-          # Si está dentro del rango, crear y unir inmediatamente
+          # Si está dentro del rango, crear y unir inmediatamente PERO también devolver datos para el botón
           url = create_and_join(meeting_data)
-          render json: { url: url }
+          render json: { 
+            url: url,  # Abrir inmediatamente
+            success: true,  # Y también crear botón
+            meeting_id: meeting_data['meetingID'],
+            attendee_pw: meeting_data['attendeePW'],
+            moderator_pw: meeting_data['moderatorPW'],
+            start_time: start_datetime.iso8601,
+            end_time: end_datetime.iso8601,
+            message: 'Meeting is now active. Opening immediately and creating button for future access.'
+          }
         else
           # Si está fuera del rango, solo retornar éxito (el botón se creará)
-          # El acceso se validará cuando se haga clic en el botón
+          # IMPORTANTE: Incluir passwords para poder unirse después
           render json: { 
             success: true,
             meeting_id: meeting_data['meetingID'],
+            attendee_pw: meeting_data['attendeePW'],
+            moderator_pw: meeting_data['moderatorPW'],
             start_time: start_datetime.iso8601,
             end_time: end_datetime.iso8601,
             message: now < start_datetime ? 'Meeting created successfully. Access will be available at the scheduled time.' : 'Meeting has already ended.'
           }
         end
       elsif params['mode'] == 'existing' && params['meetingID']
-        # Unirse a meeting existente usando meeting ID
-        url = join_existing_meeting(params['meetingID'])
+        # Unirse a meeting existente usando meeting ID y passwords guardados
+        url = join_existing_meeting(params['meetingID'], params['attendeePW'], params['moderatorPW'])
         render json: { url: url }
       else
         # Funcionalidad existente: usar meeting ID proporcionado (modo legacy)
@@ -76,17 +87,16 @@ module BigBlue
 
     private
 
-    def join_existing_meeting(meeting_id)
+    def join_existing_meeting(meeting_id, attendee_pw, moderator_pw)
       return false unless SiteSetting.bbb_endpoint && SiteSetting.bbb_secret
       
-      # Construir URL de join directamente usando el meeting_id
-      # Para meetings creados por create_new_meeting, no necesitamos password
+      # Construir URL de join usando los passwords correctos guardados
       join_params = {
         fullName: current_user.name || current_user.username,
         meetingID: meeting_id,
         userID: current_user.username,
-        # Para meetings auto-creados, usar meeting_id como password (método simple)
-        password: meeting_id.split('-').last  # Usar parte del ID como password simple
+        # Usar el password correcto según el rol del usuario
+        password: is_moderator ? moderator_pw : attendee_pw
       }.to_query
 
       build_url("join", join_params)
