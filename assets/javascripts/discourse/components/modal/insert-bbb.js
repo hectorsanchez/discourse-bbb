@@ -11,6 +11,20 @@ export default class InsertBbbModal extends Component {
   @tracked startTime = "";
   @tracked duration = "";
   @tracked errorMsg = "";
+  @tracked commitHash = "";
+
+  constructor() {
+    super(...arguments);
+    this.loadCommitHash();
+  }
+
+  loadCommitHash() {
+    // Obtener el commit hash desde la API de Discourse
+    const site = this.args.model.toolbarEvent?.site || this.site;
+    if (site && site.bbb_plugin_commit_hash) {
+      this.commitHash = site.bbb_plugin_commit_hash;
+    }
+  }
 
   get insertDisabled() {
     return (

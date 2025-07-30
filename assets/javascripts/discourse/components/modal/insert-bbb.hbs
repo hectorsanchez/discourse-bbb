@@ -59,6 +59,15 @@
         Once created, your meeting room will be accessible through a button inserted in your post.
       </label>
     </div>
+
+    <!-- Commit hash para desarrollo -->
+    {{#if this.commitHash}}
+      <div class="control-group bbb-commit-info">
+        <small style="color: #888; font-size: 11px;">
+          Plugin version: {{this.commitHash}}
+        </small>
+      </div>
+    {{/if}}
   </:body>
   
   <:footer>

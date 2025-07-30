@@ -12,7 +12,7 @@ update-compatibility:
 	@echo "Actualizando .discourse-compatibility con commit $(COMMIT_HASH)..."
 	@echo "$(DISCOURSE_VERSION): $(COMMIT_HASH)" > .discourse-compatibility
 	@git add .
-	@git commit -m "update compatibility"
+	@git commit -m "update compatibility $(COMMIT_HASH)"
 	@git push
 	@echo "✅ Compatibilidad actualizada y pusheada"
 

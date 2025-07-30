@@ -34,6 +34,20 @@ after_initialize do
     mount ::BigBlue::Engine, at: "/bbb"
   end
 
+  # Agregar commit hash para desarrollo (leer desde .discourse-compatibility)
+  add_to_serializer(:site, :bbb_plugin_commit_hash) do
+    begin
+      compatibility_file = File.join(Rails.root, "plugins", "discourse-bbb", ".discourse-compatibility")
+      if File.exist?(compatibility_file)
+        content = File.read(compatibility_file).strip
+        match = content.match(/:\s*([a-f0-9]+)/)
+        match ? match[1][0..6] : nil # Primeros 7 caracteres
+      end
+    rescue
+      nil
+    end
+  end
+
   # Usar un enfoque más básico que funciona en Discourse 3.5.0.beta8-dev
   # Procesar el BBCode después de que se haya creado el HTML
   
