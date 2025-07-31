@@ -139,10 +139,8 @@ module BigBlue
         welcome: "Welcome to the Discourse meeting!",
         duration: 0,  # 0 = duración indefinida (sin límite de tiempo)
         endWhenNoModerator: false,  # Meeting NO se cierra si no hay moderador
-        autoStartRecording: false,  # No iniciar grabación automática
-        allowStartStopRecording: true,  # Permitir control de grabación manual
-        record: false,  # No grabar por defecto
-        noAnswerTimeout: 0  # No eliminar la reunión si nadie entra
+        noAnswerTimeout: 0,  # No eliminar la reunión si nadie entra
+        meetingExpireWhenLastUserLeftInMinutes: 0  # No eliminar la reunión si el último usuario se va
       }
       
       query = create_params.map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join('&')
