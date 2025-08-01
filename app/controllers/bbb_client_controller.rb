@@ -130,6 +130,20 @@ module BigBlue
       meeting_id = "discourse-#{SecureRandom.hex(8)}-#{Time.now.to_i}"
       attendee_pw = SecureRandom.hex(8)
       moderator_pw = SecureRandom.hex(8)
+
+      # Calcular minutos hasta la fecha/hora seleccionada y sumar 5 minutos extra
+      expire_minutes = 5
+      if args['startDate'].present? && args['startTime'].present?
+        begin
+          start_datetime = Time.strptime("#{args['startDate']} #{args['startTime']}", "%Y-%m-%d %H:%M").utc
+          now = Time.now.utc
+          expire_minutes = ((start_datetime - now) / 60).ceil + 5
+          expire_minutes = expire_minutes > 0 ? expire_minutes : 5 # mínimo 5 minutos
+        rescue ArgumentError
+          expire_minutes = 5
+        end
+      end
+
       create_params = {
         name: args['meetingName'] || "Discourse Meeting",
         meetingID: meeting_id,
@@ -140,7 +154,8 @@ module BigBlue
         duration: 0,  # 0 = duración indefinida (sin límite de tiempo)
         endWhenNoModerator: false,  # Meeting NO se cierra si no hay moderador
         noAnswerTimeout: 0,  # No eliminar la reunión si nadie entra
-        meetingExpireWhenLastUserLeftInMinutes: 0  # No eliminar la reunión si el último usuario se va
+        meetingExpireWhenLastUserLeftInMinutes: 0,  # No eliminar la reunión si el último usuario se va
+        meetingExpireIfNoUserJoinedInMinutes: expire_minutes # valor calculado + 5 minutos
       }
       
       query = create_params.map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join('&')
