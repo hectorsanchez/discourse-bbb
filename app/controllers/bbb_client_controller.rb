@@ -131,6 +131,19 @@ module BigBlue
       attendee_pw = SecureRandom.hex(8)
       moderator_pw = SecureRandom.hex(8)
 
+      # Validar que la fecha no sea mayor a 90 días desde hoy
+      if args['startDate'].present?
+        begin
+          start_date = Date.parse(args['startDate'])
+          max_date = Date.today + 90
+          if start_date > max_date
+            render json: { error: I18n.t("js.bbb.errors.date_too_far") }, status: 422 and return
+          end
+        rescue ArgumentError
+          render json: { error: I18n.t("js.bbb.errors.invalid_date") }, status: 422 and return
+        end
+      end
+
       # Calcular minutos hasta la fecha/hora seleccionada y sumar 5 minutos extra
       expire_minutes = 5
       if args['startDate'].present? && args['startTime'].present?

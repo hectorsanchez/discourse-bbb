@@ -23,3 +23,4 @@ en:
         not_started: "The meeting has not started yet."
         ended: "The meeting has already ended."
         create_failed: "Could not create meeting. Please try again."
+        date_too_far: "Selected date cannot be more than 90 days from today."

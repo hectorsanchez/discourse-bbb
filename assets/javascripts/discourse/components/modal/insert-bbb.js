@@ -11,9 +11,18 @@ export default class InsertBbbModal extends Component {
   @tracked startTime = "";
   @tracked errorMsg = "";
   @tracked commitHash = "";
+  @tracked todayDate = "";
+  @tracked maxDate = "";
 
   constructor() {
     super(...arguments);
+    const today = new Date();
+    this.todayDate = today.toISOString().slice(0, 10);
+
+    const maxDateObj = new Date();
+    maxDateObj.setDate(today.getDate() + 90);
+    this.maxDate = maxDateObj.toISOString().slice(0, 10);
+
     this.loadCommitHash();
   }
 
@@ -59,12 +68,6 @@ export default class InsertBbbModal extends Component {
     return "";
   }
 
-  get todayDate() {
-    // Retornar fecha de hoy en formato YYYY-MM-DD para el input date
-    const today = new Date();
-    return today.toISOString().split('T')[0];
-  }
-
   @action
   handleInput(event) {
     const value = event.target.value;
@@ -106,6 +109,16 @@ export default class InsertBbbModal extends Component {
       return;
     }
     
+    const selectedDate = new Date(this.startDate);
+    const today = new Date();
+    const maxDate = new Date();
+    maxDate.setDate(today.getDate() + 90);
+
+    if (selectedDate > maxDate) {
+      this.errorMsg = I18n.t("js.bbb.errors.date_too_far");
+      return;
+    }
+
     try {
       const data = {
         mode: "new",

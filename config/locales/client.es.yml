@@ -1,0 +1,26 @@
+es:
+  js:
+    bbb:
+      composer_title: "Crear una sala de reunión"
+      launch: "Unirse a la reunión"
+      meetingName: "Nombre de la reunión"
+      meetingName_placeholder: "Ingrese el nombre de la reunión"
+      button_text: "Texto del botón"
+      modal:
+        title: "Crear una sala de reunión"
+        insert: "Crear la sala"
+        cancel: "Cancelar"
+        mobile_iframe: "Mostrar como iframe en móvil"
+        desktop_iframe: "Mostrar como iframe en escritorio"
+      startDate: "Fecha de inicio"
+      startTime: "Hora de inicio (GMT)"
+      duration: "Duración (minutos)"
+      errors:
+        missing_fields: "La fecha y hora de inicio son obligatorias."
+        invalid_date: "Formato de fecha u hora inválido."
+        invalid_duration: "La duración debe ser un número positivo."
+        past_date: "La fecha de inicio no puede estar en el pasado."
+        not_started: "La reunión aún no ha comenzado."
+        ended: "La reunión ya ha finalizado."
+        create_failed: "No se pudo crear la reunión. Por favor, inténtelo de nuevo."
+        date_too_far: "La fecha seleccionada no puede ser mayor a 90 días
