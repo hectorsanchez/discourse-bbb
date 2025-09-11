@@ -9,6 +9,9 @@ function launchBBB($elem) {
   const site = Discourse.__container__.lookup("site:main");
   const capabilities = Discourse.__container__.lookup("capabilities:main");
 
+  // Configuración: minutos antes de la hora programada para permitir acceso
+  const minutesBefore = 5;
+
   // Si es un meeting programado, validar acceso (solo fecha de inicio, sin límite de duración)
   if (data.startdate && data.starttime) {
     const startDate = data.startdate;
@@ -18,7 +21,10 @@ function launchBBB($elem) {
       const startDateTime = new Date(`${startDate} ${startTime} UTC`);
       const now = new Date();
       
-      if (now < startDateTime) {
+      // Calcular tiempo permitido: hora programada menos minutesBefore
+      const allowedTime = new Date(startDateTime.getTime() - (minutesBefore * 60000));
+      
+      if (now < allowedTime) {
         // Meeting no ha comenzado
         const startTimeStr = startDateTime.toLocaleString();
         alert(`The meeting has not started yet. (Starts: ${startTimeStr})`);

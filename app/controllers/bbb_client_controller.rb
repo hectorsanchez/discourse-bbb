@@ -31,13 +31,18 @@ module BigBlue
         end
 
         now = Time.now.utc
+        
+        # Configuración: minutos antes de la hora programada para permitir acceso
+        minutes_before = 5
 
         # Siempre crear el meeting (sin límite de duración)
         meeting_data = create_new_meeting(params)
         return render json: { error: 'Could not create meeting' } unless meeting_data
 
         # Verificar si está dentro del rango para acceso inmediato (solo inicio, sin fin)
-        if now >= start_datetime
+        # Permitir acceso desde X minutos antes de la hora programada
+        allowed_time = start_datetime - (minutes_before * 60)
+        if now >= allowed_time
           # Si está dentro del rango, crear y unir inmediatamente PERO también devolver datos para el botón
           url = create_and_join(meeting_data)
           render json: { 

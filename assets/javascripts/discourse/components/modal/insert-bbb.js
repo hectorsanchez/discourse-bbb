@@ -14,6 +14,9 @@ export default class InsertBbbModal extends Component {
   @tracked todayDate = "";
   @tracked maxDate = "";
 
+  // Configuración: minutos antes de la hora programada para permitir acceso
+  minutesBefore = 5;
+
   constructor() {
     super(...arguments);
     const today = new Date();
@@ -52,10 +55,10 @@ export default class InsertBbbModal extends Component {
       const selectedDateTime = new Date(`${this.startDate} ${this.startTime}`);
       const now = new Date();
       
-      // Agregar 1 minuto de buffer para evitar problemas de timing
-      const nowWithBuffer = new Date(now.getTime() + 60000);
+      // Calcular tiempo permitido: hora programada menos minutesBefore
+      const allowedTime = new Date(selectedDateTime.getTime() - (this.minutesBefore * 60000));
       
-      return selectedDateTime < nowWithBuffer;
+      return now < allowedTime;
     } catch (e) {
       return true; // Si hay error en parsing, considerar inválido
     }

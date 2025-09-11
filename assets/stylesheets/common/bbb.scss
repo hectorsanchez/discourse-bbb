@@ -25,6 +25,7 @@
     display: flex;
     gap: 1em;
     align-items: flex-end;
+    margin-bottom: 8px;
 
     .bbb-date-field,
     .bbb-time-field {
@@ -51,7 +52,7 @@
   }
 
   .control-group {
-    margin-bottom: 1em;
+    margin-bottom: 12px;
 
     label {
       display: block;
@@ -77,4 +78,12 @@
       }
     }
   }
+}
+
+.bbb-modal,
+.DModal .modal-inner-container {
+  max-height: 80vh; /* Usa hasta el 80% de la altura de la ventana */
+  overflow-y: auto; /* Permite scroll si es necesario */
+  padding-top: 16px;
+  padding-bottom: 16px;
 }
