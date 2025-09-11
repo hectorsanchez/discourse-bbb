@@ -52,13 +52,15 @@ export default class InsertBbbModal extends Component {
     }
 
     try {
-      const selectedDateTime = new Date(`${this.startDate} ${this.startTime}`);
+      // Crear fecha en GMT para ser consistente con el backend
+      const selectedDateTime = new Date(`${this.startDate}T${this.startTime}:00Z`);
       const now = new Date();
       
-      // Calcular tiempo permitido: hora programada menos minutesBefore
-      const allowedTime = new Date(selectedDateTime.getTime() - (this.minutesBefore * 60000));
+      // Para validación del modal: usar hora exacta (sin los 5 minutos de buffer)
+      // Agregar 1 minuto de buffer para evitar problemas de timing
+      const nowWithBuffer = new Date(now.getTime() + 60000);
       
-      return now < allowedTime;
+      return selectedDateTime < nowWithBuffer;
     } catch (e) {
       return true; // Si hay error en parsing, considerar inválido
     }
