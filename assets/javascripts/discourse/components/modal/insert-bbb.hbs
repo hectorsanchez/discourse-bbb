@@ -54,6 +54,21 @@
 
 
 
+    <!-- Opción de grabación -->
+    <div class="control-group">
+      <label class="checkbox-label">
+        <input 
+          type="checkbox" 
+          checked={{this.recordMeeting}} 
+          {{on "change" this.handleRecordChange}}
+        />
+        {{i18n "bbb.record_meeting"}}
+      </label>
+      <div class="help-text">
+        {{i18n "bbb.record_meeting_help"}}
+      </div>
+    </div>
+
     <!-- Texto de ayuda -->
     <div class="control-group">
       <label>

@@ -15,6 +15,8 @@ es:
       startDate: "Fecha de inicio"
       startTime: "Hora de inicio (GMT)"
       duration: "Duración (minutos)"
+      record_meeting: "Grabar la reunión"
+      record_meeting_help: "La grabación comenzará automáticamente cuando el primer participante se una a la reunión."
       errors:
         missing_fields: "La fecha y hora de inicio son obligatorias."
         invalid_date: "Formato de fecha u hora inválido."

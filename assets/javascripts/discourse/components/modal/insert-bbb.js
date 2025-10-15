@@ -13,6 +13,7 @@ export default class InsertBbbModal extends Component {
   @tracked commitHash = "";
   @tracked todayDate = "";
   @tracked maxDate = "";
+  @tracked recordMeeting = false;
 
   // Configuración: minutos antes de la hora programada para permitir acceso
   minutesBefore = 5;
@@ -102,6 +103,11 @@ export default class InsertBbbModal extends Component {
     }
   }
 
+  @action
+  handleRecordChange(event) {
+    this.recordMeeting = event.target.checked;
+  }
+
 
 
   @action
@@ -129,7 +135,8 @@ export default class InsertBbbModal extends Component {
         mode: "new",
         meetingName: this.meetingName,
         startDate: this.startDate,
-        startTime: this.startTime
+        startTime: this.startTime,
+        recordMeeting: this.recordMeeting
       };
       const res = await ajax("/bbb/create.json", {
         type: "POST",

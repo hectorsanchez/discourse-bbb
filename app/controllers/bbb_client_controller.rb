@@ -176,6 +176,15 @@ module BigBlue
         meetingExpireIfNoUserJoinedInMinutes: expire_minutes # valor calculado + 5 minutos
       }
       
+      # Agregar parámetros de grabación si se especifica
+      if args['recordMeeting'] == 'true' || args['recordMeeting'] == true
+        create_params[:record] = 'true'
+        create_params[:autoStartRecording] = 'true'
+        create_params[:allowStartStopRecording] = 'true'
+      else
+        create_params[:record] = 'false'
+      end
+      
       query = create_params.map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join('&')
       secret = SiteSetting.bbb_secret
       checksum = Digest::SHA1.hexdigest("create" + query + secret)

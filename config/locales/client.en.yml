@@ -15,6 +15,8 @@ en:
       startDate: "Start Date"
       startTime: "Start Time (GMT)"
       duration: "Duration (minutes)"
+      record_meeting: "Record the meeting"
+      record_meeting_help: "Recording will start automatically when the first participant joins the meeting."
       errors:
         missing_fields: "Start date and time are required."
         invalid_date: "Invalid date or time format."
