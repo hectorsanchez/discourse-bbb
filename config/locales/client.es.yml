@@ -25,4 +25,4 @@ es:
         not_started: "La reunión aún no ha comenzado."
         ended: "La reunión ya ha finalizado."
         create_failed: "No se pudo crear la reunión. Por favor, inténtelo de nuevo."
-        date_too_far: "La fecha seleccionada no puede ser mayor a 90 días
+        date_too_far: "La fecha seleccionada no puede ser mayor a 90 días."
