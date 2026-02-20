@@ -33,7 +33,7 @@ module BigBlue
         now = Time.now.utc
         
         # Configuración: minutos antes de la hora programada para permitir acceso
-        minutes_before = 5
+        minutes_before = 10
 
         # Siempre crear el meeting (sin límite de duración)
         meeting_data = create_new_meeting(params)

@@ -10,7 +10,7 @@ function launchBBB($elem) {
   const capabilities = Discourse.__container__.lookup("capabilities:main");
 
   // Configuración: minutos antes de la hora programada para permitir acceso
-  const minutesBefore = 5;
+  const minutesBefore = 10;
 
   // Si es un meeting programado, validar acceso (solo fecha de inicio, sin límite de duración)
   if (data.startdate && data.starttime) {

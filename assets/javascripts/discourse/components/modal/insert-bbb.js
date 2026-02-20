@@ -16,7 +16,7 @@ export default class InsertBbbModal extends Component {
   @tracked recordMeeting = false;
 
   // Configuración: minutos antes de la hora programada para permitir acceso
-  minutesBefore = 5;
+  minutesBefore = 10;
 
   constructor() {
     super(...arguments);
