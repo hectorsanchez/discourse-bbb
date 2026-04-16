@@ -7,6 +7,9 @@ module BigBlue
   class BbbClientController < ApplicationController
     before_action :ensure_logged_in
 
+    # Reingreso sin fecha en contexto: evita expiración por "nadie se unió" demasiado pronto al recrear sala.
+    BBB_DEFAULT_NO_JOIN_EXPIRE_MINUTES = 525_600
+
     def create
       if params['mode'] == 'new'
         # Validar y procesar los nuevos parámetros de fecha
@@ -45,6 +48,9 @@ module BigBlue
         if now >= allowed_time
           # Si está dentro del rango, crear y unir inmediatamente PERO también devolver datos para el botón
           url = create_and_join(meeting_data)
+          unless url
+            return render json: { error: 'Could not open meeting' }, status: 502
+          end
           render json: { 
             url: url,  # Abrir inmediatamente
             success: true,  # Y también crear botón
@@ -67,12 +73,17 @@ module BigBlue
           }
         end
       elsif params['mode'] == 'existing' && params['meetingID']
-        # Unirse a meeting existente usando meeting ID y passwords guardados
+        unless ensure_meeting_before_join(params['meetingID'], params['attendeePW'], params['moderatorPW'])
+          return render json: { error: 'Could not open meeting' }, status: 502
+        end
         url = join_existing_meeting(params['meetingID'], params['attendeePW'], params['moderatorPW'])
         render json: { url: url }
       else
         # Funcionalidad existente: usar meeting ID proporcionado (modo legacy)
         url = create_and_join(params)
+        unless url
+          return render json: { error: 'Could not open meeting' }, status: 502
+        end
         render json: { url: url }
       end
     end
@@ -98,27 +109,44 @@ module BigBlue
       build_url("join", join_params)
     end
 
+    def ensure_meeting_before_join(meeting_id, attendee_pw, moderator_pw)
+      Rails.logger.info(
+        "[bbb] ensure_meeting_before_join meetingID=#{meeting_id} user=#{current_user.username}"
+      )
+      create_params = persistent_meeting_create_params(
+        meeting_id: meeting_id,
+        attendee_pw: attendee_pw,
+        moderator_pw: moderator_pw,
+        name: "Discourse Meeting",
+        no_join_expire_minutes: BBB_DEFAULT_NO_JOIN_EXPIRE_MINUTES,
+        record_meeting: false
+      )
+      ok, = bbb_execute_create(create_params)
+      ok
+    end
+
     def create_and_join(args)
       return false unless SiteSetting.bbb_endpoint && SiteSetting.bbb_secret
+
+      args = args.stringify_keys if args.respond_to?(:stringify_keys)
 
       meeting_id = args['meetingID']
       attendee_pw = args['attendeePW']
       moderator_pw = args['moderatorPW']
+      name = args['meetingName'].presence || "Discourse Meeting"
+      no_join = args['meetingExpireIfNoUserJoinedInMinutes'] || BBB_DEFAULT_NO_JOIN_EXPIRE_MINUTES
+      record = args['recordMeeting'] == 'true' || args['recordMeeting'] == true
 
-      query = {
-        meetingID: meeting_id,
-        attendeePW: attendee_pw,
-        moderatorPW: moderator_pw,
-        logoutURL: Discourse.base_url
-      }.to_query
-
-      create_url = build_url("create", query)
-      response = Excon.get(create_url)
-
-      if response.status != 200
-        Rails.logger.warn("Could not create meeting: #{response.inspect}")
-        return false
-      end
+      create_params = persistent_meeting_create_params(
+        meeting_id: meeting_id,
+        attendee_pw: attendee_pw,
+        moderator_pw: moderator_pw,
+        name: name,
+        no_join_expire_minutes: no_join,
+        record_meeting: record
+      )
+      ok, = bbb_execute_create(create_params)
+      return false unless ok
 
       join_params = {
         fullName: current_user.name || current_user.username,
@@ -162,58 +190,91 @@ module BigBlue
         end
       end
 
-      create_params = {
-        name: args['meetingName'] || "Discourse Meeting",
+      name = args['meetingName'] || "Discourse Meeting"
+      record = args['recordMeeting'] == 'true' || args['recordMeeting'] == true
+
+      create_params = persistent_meeting_create_params(
+        meeting_id: meeting_id,
+        attendee_pw: attendee_pw,
+        moderator_pw: moderator_pw,
+        name: name,
+        no_join_expire_minutes: expire_minutes,
+        record_meeting: record
+      )
+
+      ok, data = bbb_execute_create(create_params)
+      if ok
+        Rails.logger.info("New BBB meeting created successfully: #{meeting_id} with duration=0 (infinite)")
+        {
+          'meetingID' => meeting_id,
+          'attendeePW' => attendee_pw,
+          'moderatorPW' => moderator_pw,
+          'meetingName' => name,
+          'meetingExpireIfNoUserJoinedInMinutes' => expire_minutes,
+          'recordMeeting' => record
+        }
+      else
+        Rails.logger.error("BBB meeting creation failed: #{data.inspect}")
+        false
+      end
+    end
+
+    def persistent_meeting_create_params(meeting_id:, attendee_pw:, moderator_pw:, name:, no_join_expire_minutes:, record_meeting:)
+      params_hash = {
+        name: name,
         meetingID: meeting_id,
         attendeePW: attendee_pw,
         moderatorPW: moderator_pw,
         logoutURL: Discourse.base_url,
         welcome: "Welcome to the Discourse meeting!",
-        duration: 0,  # 0 = duración indefinida (sin límite de tiempo)
-        endWhenNoModerator: false,  # Meeting NO se cierra si no hay moderador
-        noAnswerTimeout: 0,  # No eliminar la reunión si nadie entra
-        meetingExpireWhenLastUserLeftInMinutes: 0,  # No eliminar la reunión si el último usuario se va
-        meetingExpireIfNoUserJoinedInMinutes: expire_minutes # valor calculado + 5 minutos
+        duration: 0,
+        endWhenNoModerator: false,
+        noAnswerTimeout: 0,
+        meetingExpireWhenLastUserLeftInMinutes: 0,
+        meetingExpireIfNoUserJoinedInMinutes: no_join_expire_minutes
       }
-      
-      # Agregar parámetros de grabación si se especifica
-      if args['recordMeeting'] == 'true' || args['recordMeeting'] == true
-        create_params[:record] = 'true'
-        create_params[:autoStartRecording] = 'true'
-        create_params[:allowStartStopRecording] = 'true'
+      if record_meeting
+        params_hash[:record] = 'true'
+        params_hash[:autoStartRecording] = 'true'
+        params_hash[:allowStartStopRecording] = 'true'
       else
-        create_params[:record] = 'false'
+        params_hash[:record] = 'false'
       end
-      
-      query = create_params.map { |k, v| "#{k}=#{URI.encode_www_form_component(v)}" }.join('&')
+      params_hash
+    end
+
+    def bbb_execute_create(create_params)
+      query = create_params.map do |k, v|
+        encoded =
+          if v == true || v == false
+            v.to_s
+          else
+            URI.encode_www_form_component(v.to_s)
+          end
+        "#{k}=#{encoded}"
+      end.join('&')
       secret = SiteSetting.bbb_secret
       checksum = Digest::SHA1.hexdigest("create" + query + secret)
       create_url = "#{SiteSetting.bbb_endpoint}create?#{query}&checksum=#{checksum}"
-      
-      # Log para debug - verificar parámetros enviados
+
       Rails.logger.info("Creating BBB meeting with params: #{create_params.inspect}")
       Rails.logger.info("BBB create URL (without secret): #{SiteSetting.bbb_endpoint}create?#{query}")
-      
+
       response = Excon.get(create_url)
-      if response.status == 200
-        data = Hash.from_xml(response.body)
-        Rails.logger.info("BBB create response: #{data.inspect}")
-        
-        if data['response']['returncode'] == "SUCCESS"
-          Rails.logger.info("New BBB meeting created successfully: #{meeting_id} with duration=0 (infinite)")
-          {
-            'meetingID' => meeting_id,
-            'attendeePW' => attendee_pw,
-            'moderatorPW' => moderator_pw
-          }
-        else
-          Rails.logger.error("BBB meeting creation failed: #{data['response']['message']}")
-          Rails.logger.error("Full BBB error response: #{data.inspect}")
-          false
-        end
-      else
+      if response.status != 200
         Rails.logger.error("Could not create BBB meeting: HTTP #{response.status}, Body: #{response.body}")
-        false
+        return [false, response.body]
+      end
+
+      data = Hash.from_xml(response.body)
+      Rails.logger.info("BBB create response: #{data.inspect}")
+
+      if data['response']['returncode'] == "SUCCESS"
+        [true, data]
+      else
+        Rails.logger.error("BBB meeting creation failed: #{data['response']['message']}")
+        Rails.logger.error("Full BBB error response: #{data.inspect}")
+        [false, data]
       end
     end
 
