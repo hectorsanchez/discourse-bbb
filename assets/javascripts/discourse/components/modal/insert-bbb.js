@@ -2,7 +2,7 @@ import Component from "@glimmer/component";
 import { tracked } from "@glimmer/tracking";
 import { action } from "@ember/object";
 import { isEmpty } from "@ember/utils";
-import I18n from "I18n";
+import { i18n } from "discourse-i18n";
 import { ajax } from "discourse/lib/ajax";
 
 export default class InsertBbbModal extends Component {
@@ -126,7 +126,7 @@ export default class InsertBbbModal extends Component {
     maxDate.setDate(today.getDate() + 90);
 
     if (selectedDate > maxDate) {
-      this.errorMsg = I18n.t("js.bbb.errors.date_too_far");
+      this.errorMsg = i18n("js.bbb.errors.date_too_far");
       return;
     }
 
@@ -176,23 +176,23 @@ export default class InsertBbbModal extends Component {
   }
 
   _errorMessage(msg, responseData) {
-    if (!msg) return I18n.t("js.bbb.errors.create_failed");
+    if (!msg) return i18n("js.bbb.errors.create_failed");
     
     if (msg.match(/not started/i)) {
       let startTime = responseData?.start_time ? new Date(responseData.start_time).toLocaleString() : '';
-      return I18n.t("js.bbb.errors.not_started") + (startTime ? ` (Starts: ${startTime})` : '');
+      return i18n("js.bbb.errors.not_started") + (startTime ? ` (Starts: ${startTime})` : '');
     }
     
     if (msg.match(/already ended/i)) {
       let endTime = responseData?.end_time ? new Date(responseData.end_time).toLocaleString() : '';
-      return I18n.t("js.bbb.errors.ended") + (endTime ? ` (Ended: ${endTime})` : '');
+      return i18n("js.bbb.errors.ended") + (endTime ? ` (Ended: ${endTime})` : '');
     }
     
-    if (msg.match(/past/i)) return I18n.t("js.bbb.errors.past_date");
-    if (msg.match(/missing/i)) return I18n.t("js.bbb.errors.missing_fields");
-    if (msg.match(/invalid date/i)) return I18n.t("js.bbb.errors.invalid_date");
-    if (msg.match(/invalid duration/i)) return I18n.t("js.bbb.errors.invalid_duration");
+    if (msg.match(/past/i)) return i18n("js.bbb.errors.past_date");
+    if (msg.match(/missing/i)) return i18n("js.bbb.errors.missing_fields");
+    if (msg.match(/invalid date/i)) return i18n("js.bbb.errors.invalid_date");
+    if (msg.match(/invalid duration/i)) return i18n("js.bbb.errors.invalid_duration");
     
-    return I18n.t("js.bbb.errors.create_failed");
+    return i18n("js.bbb.errors.create_failed");
   }
 }

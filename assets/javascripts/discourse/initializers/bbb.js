@@ -1,13 +1,12 @@
 import InsertBbbModal from "../components/modal/insert-bbb";
 import { withPluginApi } from "discourse/lib/plugin-api";
-import { iconHTML } from "discourse-common/lib/icon-library";
+import { iconHTML } from "discourse/lib/icon-library";
 import { ajax } from "discourse/lib/ajax";
 import { popupAjaxError } from "discourse/lib/ajax-error";
+import { i18n } from "discourse-i18n";
 
-function launchBBB($elem) {
-  const data = $elem.data();
-  const site = Discourse.__container__.lookup("site:main");
-  const capabilities = Discourse.__container__.lookup("capabilities:main");
+function launchBBB(el) {
+  const data = el.dataset;
 
   // Configuración: minutos antes de la hora programada para permitir acceso
   const minutesBefore = 10;
@@ -16,14 +15,14 @@ function launchBBB($elem) {
   if (data.startdate && data.starttime) {
     const startDate = data.startdate;
     const startTime = data.starttime;
-    
+
     try {
       const startDateTime = new Date(`${startDate} ${startTime} UTC`);
       const now = new Date();
-      
+
       // Calcular tiempo permitido: hora programada menos minutesBefore
       const allowedTime = new Date(startDateTime.getTime() - (minutesBefore * 60000));
-      
+
       if (now < allowedTime) {
         // Meeting no ha comenzado
         const startTimeStr = startDateTime.toLocaleString();
@@ -38,7 +37,7 @@ function launchBBB($elem) {
 
   // Preparar datos para el backend
   const requestData = {};
-  
+
   if (data.meetingid) {
     // Es un meeting existente - usar el meeting ID y passwords guardados
     requestData.meetingID = data.meetingid;
@@ -70,65 +69,72 @@ function launchBBB($elem) {
     });
 }
 
-function attachButton($elem) {
-  const data = $elem.data();
-  const meetingName = data.meetingname || data.meetingName; // Puede venir como meetingname o meetingName
+function attachButton(el) {
+  const data = el.dataset;
+  const meetingName = data.meetingname;
   const customLabel = data.label;
-  
+
   let buttonLabel;
   if (customLabel) {
     buttonLabel = customLabel;
   } else if (meetingName) {
     buttonLabel = `Join Meeting: ${meetingName}`;
   } else {
-    buttonLabel = I18n.t("bbb.launch");
+    buttonLabel = i18n("bbb.launch");
   }
-  
-  $elem.html(
-    `<button class='launch-bbb btn'>${iconHTML(
-      "video"
-    )} ${buttonLabel}</button>`
-  );
-  $elem.find("button").on("click", () => launchBBB($elem));
+
+  el.innerHTML = `<button class='launch-bbb btn'>${iconHTML(
+    "video"
+  )} ${buttonLabel}</button>`;
+  el.querySelector("button").addEventListener("click", () => launchBBB(el));
 }
 
-function attachStatus($elem, helper) {
-  const status = $elem.find(".bbb-status");
-  const data = $elem.data();
+function attachStatus(el) {
+  const status = el.querySelector(".bbb-status");
+  const data = el.dataset;
 
   ajax(`/bbb/status/${data.meetingID}.json`).then((res) => {
     if (res.avatars) {
-      status.html(`<span>On the call: </span>`);
+      status.innerHTML = `<span>On the call: </span>`;
       res.avatars.forEach(function (avatar) {
-        status.append(
-          `<img src="${avatar.avatar_url}" class="avatar" width="25" height="25" title="${avatar.name}" />`
-        );
+        const img = document.createElement("img");
+        img.src = avatar.avatar_url;
+        img.className = "avatar";
+        img.width = 25;
+        img.height = 25;
+        img.title = avatar.name;
+        status.appendChild(img);
       });
     }
   });
 }
 
-function attachBBB($elem, helper) {
-  if (helper) {
-    $elem.find("[data-wrap=discourse-bbb]").each((idx, val) => {
-      attachButton($(val));
-      $(val).append("<span class='bbb-status'></span>");
-      attachStatus($(val), helper);
-    });
-  }
+function attachBBB(element) {
+  element.querySelectorAll("[data-wrap=discourse-bbb]").forEach((el) => {
+    attachButton(el);
+    const status = document.createElement("span");
+    status.className = "bbb-status";
+    el.appendChild(status);
+    attachStatus(el);
+  });
 }
 
 export default {
   name: "insert-bbb",
 
   initialize() {
-    withPluginApi("1.13.0", (api) => {
+    withPluginApi((api) => {
       const currentUser = api.getCurrentUser();
-      const siteSettings = api.container.lookup("site-settings:main");
+      const siteSettings = api.container.lookup("service:site-settings");
 
-      api.decorateCooked(attachBBB, {
-        id: "discourse-bbb",
-      });
+      api.decorateCookedElement(
+        (element, helper) => {
+          if (helper) {
+            attachBBB(element);
+          }
+        },
+        { id: "discourse-bbb" }
+      );
 
       if (
         !siteSettings.bbb_staff_only ||

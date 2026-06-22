@@ -21,7 +21,7 @@
 ## Key Files
 - **plugin.rb**: Plugin definition, routes, engine setup
 - **app/controllers/bbb_client_controller.rb**: BBB API integration, meeting management
-- **assets/javascripts/discourse/initializers/bbb.js.es6**: Plugin initialization, toolbar integration
+- **assets/javascripts/discourse/initializers/bbb.js**: Plugin initialization, toolbar integration
 - **assets/javascripts/discourse/components/modal/insert-bbb.js**: Meeting creation modal
 - **config/settings.yml**: Plugin settings (endpoint, secret, permissions)
 
